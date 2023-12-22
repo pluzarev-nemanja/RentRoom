@@ -1,4 +1,4 @@
-package com.example.rentproject.ui.theme
+package com.example.rentproject.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build
