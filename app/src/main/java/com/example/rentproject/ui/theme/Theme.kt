@@ -1,4 +1,4 @@
-package com.example.rentproject.presentation.ui.theme
+package com.example.rentproject.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -16,25 +16,21 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = yellow,
+    primaryContainer = lightGrey,
+    secondary = lightGrey,
+    background = darkGrey,
+    surface = darkGrey,
+    onPrimary = white
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = lightGrey,
+    primaryContainer = lightGrey,
+    secondary = yellow,
+    background = white,
+    surface = white,
+    onPrimary = darkGrey,
 )
 
 @Composable

@@ -6,7 +6,8 @@ import com.example.rentproject.domain.model.Room
 
 @Database(
     entities = [Room::class],
-    version = 1
+    version = 1,
+    exportSchema = false
 )
 abstract class RoomDataBase : RoomDatabase() {
     abstract val roomDao : RoomDao
