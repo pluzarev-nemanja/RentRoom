@@ -23,4 +23,8 @@ class RoomRepositoryImpl(
     override suspend fun deleteRoom(room: Room) {
         roomDao.deleteRoom(room)
     }
+
+    override suspend fun insertRooms(roomsList: MutableList<Room>) {
+        roomDao.insertRooms(roomsList)
+    }
 }

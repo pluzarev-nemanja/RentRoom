@@ -11,4 +11,6 @@ interface RoomRepository {
     suspend fun upsertRoom(room: Room)
 
     suspend fun deleteRoom(room: Room)
+    suspend fun insertRooms(roomsList: MutableList<Room>)
+
 }

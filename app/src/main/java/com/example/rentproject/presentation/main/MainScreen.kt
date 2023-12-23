@@ -11,12 +11,4 @@ import androidx.compose.ui.Modifier
 @Composable
 fun MainScreen() {
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Button(onClick = { /*TODO*/ }) {
-            Text(text = "Click Me")
-        }
-        OutlinedButton(onClick = { /*TODO*/ }) {
-            Text(text = "Random")
-        }
-    }
 }

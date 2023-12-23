@@ -8,6 +8,7 @@ import com.example.rentproject.domain.repository.RoomRepository
 import com.example.rentproject.domain.use_case.DeleteRoom
 import com.example.rentproject.domain.use_case.GetRoomById
 import com.example.rentproject.domain.use_case.GetRooms
+import com.example.rentproject.domain.use_case.InsertRooms
 import com.example.rentproject.domain.use_case.RoomUseCases
 import com.example.rentproject.domain.use_case.UpsertRoom
 import dagger.Module
@@ -45,7 +46,8 @@ object AppModule {
             deleteRoom = DeleteRoom(repository),
             getRoomById = GetRoomById(repository),
             getRooms = GetRooms(repository),
-            upsertRoom = UpsertRoom(repository)
+            upsertRoom = UpsertRoom(repository),
+            insertRooms = InsertRooms(repository)
         )
     }
 

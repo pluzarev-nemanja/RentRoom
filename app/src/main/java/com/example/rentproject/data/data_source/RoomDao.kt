@@ -2,6 +2,8 @@ package com.example.rentproject.data.data_source
 
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Upsert
 import com.example.rentproject.domain.model.Room
@@ -14,7 +16,10 @@ interface RoomDao {
     fun getRooms(): Flow<List<Room>>
 
     @Query("SELECT * FROM room WHERE roomId = :id")
-    suspend fun getRoomById(id : Int) : Room?
+    suspend fun getRoomById(id: Int): Room?
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertRooms(roomsList: MutableList<Room>)
 
     @Upsert
     suspend fun upsertRoom(room: Room)
