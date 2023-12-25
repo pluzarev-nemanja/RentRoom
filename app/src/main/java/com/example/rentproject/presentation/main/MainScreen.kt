@@ -21,24 +21,38 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +70,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.rentproject.R
 import com.example.rentproject.presentation.util.RoomTabs
+import com.example.rentproject.presentation.util.SettingsItems
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -68,70 +83,138 @@ fun MainScreen() {
     val selectedTabIndex = remember {
         derivedStateOf { pagerState.currentPage }
     }
+    val items = listOf(
+        SettingsItems(
+            title = "All",
+            selectedIcon = Icons.Filled.Home,
+            unselectedIcon = Icons.Outlined.Home,
+        ),
+        SettingsItems(
+            title = "Urgent",
+            selectedIcon = Icons.Filled.Info,
+            unselectedIcon = Icons.Outlined.Info,
+            badgeCount = 45
+        ),
+        SettingsItems(
+            title = "Settings",
+            selectedIcon = Icons.Filled.Settings,
+            unselectedIcon = Icons.Outlined.Settings,
+        ),
+    )
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    var selectedItemIndex by rememberSaveable {
+        mutableIntStateOf(0)
+    }
 
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(text = "RentRoom", style = MaterialTheme.typography.headlineSmall)
-                },
-                navigationIcon = {
-                    IconButton(onClick = {}) {
-                        Icon(imageVector = Icons.Outlined.Menu, contentDescription = "Open menu")
-                    }
-                },
-                scrollBehavior = scrollBehavior
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            TabRow(
-                selectedTabIndex = selectedTabIndex.value,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                RoomTabs.entries.forEachIndexed { index, currentTab ->
-                    Tab(
-                        selected = selectedTabIndex.value == index, onClick = {
-                            scope.launch {
-                                pagerState.animateScrollToPage(currentTab.ordinal)
-                            }
+    ModalNavigationDrawer(
+        drawerContent = {
+            ModalDrawerSheet {
+                Spacer(modifier = Modifier.height(16.dp))
+                items.forEachIndexed { index, item ->
+                    NavigationDrawerItem(
+                        label = {
+                            Text(text = item.title)
                         },
-                        selectedContentColor = MaterialTheme.colorScheme.primary,
-                        unselectedContentColor = MaterialTheme.colorScheme.outline,
-                        text = {
-                            Text(text = currentTab.text)
+                        selected = index == selectedItemIndex,
+                        onClick = {
+//                                            navController.navigate(item.route)
+                            selectedItemIndex = index
+                            scope.launch {
+                                drawerState.close()
+                            }
                         },
                         icon = {
                             Icon(
-                                imageVector = if (selectedTabIndex.value == index)
-                                    currentTab.selectedIcon else currentTab.unselectedIcon,
-                                contentDescription = "Tab Icon"
+                                imageVector = if (index == selectedItemIndex) {
+                                    item.selectedIcon
+                                } else item.unselectedIcon,
+                                contentDescription = item.title
                             )
-                        }
+                        },
+                        badge = {
+                            item.badgeCount?.let {
+                                Text(text = item.badgeCount.toString())
+                            }
+                        },
+                        modifier = Modifier
+                            .padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
                 }
-
             }
-            HorizontalPager(
-                state = pagerState,
+        },
+        drawerState = drawerState
+    ) {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(text = "RentRoom", style = MaterialTheme.typography.headlineSmall)
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            scope.launch {
+                                drawerState.open()
+                            }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Menu,
+                                contentDescription = "Open menu"
+                            )
+                        }
+                    },
+                    scrollBehavior = scrollBehavior
+                )
+            }
+        ) { paddingValues ->
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) { page ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
-                    contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                TabRow(
+                    selectedTabIndex = selectedTabIndex.value,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    FloorPage(floorName = RoomTabs.entries[selectedTabIndex.value].text)
+                    RoomTabs.entries.forEachIndexed { index, currentTab ->
+                        Tab(
+                            selected = selectedTabIndex.value == index, onClick = {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(currentTab.ordinal)
+                                }
+                            },
+                            selectedContentColor = MaterialTheme.colorScheme.primary,
+                            unselectedContentColor = MaterialTheme.colorScheme.outline,
+                            text = {
+                                Text(text = currentTab.text)
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = if (selectedTabIndex.value == index)
+                                        currentTab.selectedIcon else currentTab.unselectedIcon,
+                                    contentDescription = "Tab Icon"
+                                )
+                            }
+                        )
+                    }
+
+                }
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) { page ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState()),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        FloorPage(floorName = RoomTabs.entries[selectedTabIndex.value].text)
+                    }
                 }
             }
         }
