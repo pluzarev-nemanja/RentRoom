@@ -12,7 +12,7 @@
         android:fillColor="#D68231"/>
     <path
         android:pathData="M173.9,201.1h106.2v51.1H173.9zM251.9,280h106.2v51.1H251.9z"
-       />
+        />
     <path
         android:pathData="M136.9,408.4v417.1h747.3V408.4L510.6,175.2z"
         android:fillColor="#D1D3D3"/>
