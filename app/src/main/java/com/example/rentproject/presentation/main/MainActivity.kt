@@ -23,7 +23,9 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val roomsViewModel = hiltViewModel<RoomsViewModel>()
-                    MainScreen()
+                    MainScreen(
+                        allRooms = roomsViewModel.roomsList
+                    )
                 }
             }
         }

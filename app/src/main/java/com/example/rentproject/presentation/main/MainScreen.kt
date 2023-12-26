@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,11 +15,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Home
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerValue
@@ -39,6 +41,7 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -69,13 +72,16 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.rentproject.R
+import com.example.rentproject.domain.model.Room
 import com.example.rentproject.presentation.util.RoomTabs
 import com.example.rentproject.presentation.util.SettingsItems
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    allRooms: List<Room>
+) {
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val scope = rememberCoroutineScope()
@@ -88,12 +94,6 @@ fun MainScreen() {
             title = "All",
             selectedIcon = Icons.Filled.Home,
             unselectedIcon = Icons.Outlined.Home,
-        ),
-        SettingsItems(
-            title = "Urgent",
-            selectedIcon = Icons.Filled.Info,
-            unselectedIcon = Icons.Outlined.Info,
-            badgeCount = 45
         ),
         SettingsItems(
             title = "Settings",
@@ -209,11 +209,13 @@ fun MainScreen() {
                 ) { page ->
                     Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState()),
+                            .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        FloorPage(floorName = RoomTabs.entries[selectedTabIndex.value].text)
+                        FloorPage(
+                            floorName = RoomTabs.entries[selectedTabIndex.value].text,
+                            roomsList = allRooms
+                        )
                     }
                 }
             }
@@ -224,7 +226,8 @@ fun MainScreen() {
 
 @Composable
 fun FloorPage(
-    floorName: String
+    floorName: String,
+    roomsList: List<Room>
 ) {
     Column(
         modifier = Modifier
@@ -257,15 +260,16 @@ fun FloorPage(
         Column(horizontalAlignment = Alignment.Start) {
             Text(text = "All rooms : ")
             Spacer(modifier = Modifier.height(8.dp))
-            for (i: Int in 0..20) {
-                RoomCard(
-                    title = "Room $i",
-                    description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
-                            "sed do eiusmod tempor incididunt ut labore et dolore magna " +
-                            "aliqua. Ut enim ad minim veniam, quis nostrud exercitation " +
-                            "ullamco laboris nisi ut aliquip ex ea commodo consequat."
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+            LazyColumn {
+                items(roomsList) { room ->
+                    RoomCard(
+                        title = "Room ${room.roomId}",
+                        available = room.available,
+                        rent = room.rent,
+                        numberOfPeople = room.numberOfPeople
+                        )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
         }
     }
@@ -277,17 +281,19 @@ fun RoomCard(
     title: String,
     titleFontSize: TextUnit = MaterialTheme.typography.headlineSmall.fontSize,
     titleFontWeight: FontWeight = FontWeight.Bold,
-    description: String,
-    descriptionFontSize: TextUnit = MaterialTheme.typography.titleSmall.fontSize,
-    descriptionFontWeight: FontWeight = FontWeight.Normal,
-    descriptionMaxLines: Int = 4,
     shape: Shape = MaterialTheme.shapes.medium,
-    padding: Dp = 12.dp
+    padding: Dp = 12.dp,
+    available: Boolean,
+    rent: Int,
+    numberOfPeople: Int,
 ) {
     var expandedState by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(
         targetValue = if (expandedState) 180f else 0f, label = ""
     )
+    val isAvailable by remember{
+        mutableStateOf(if (available) "Yes" else "No")
+    }
 
     Card(
         modifier = Modifier
@@ -335,13 +341,26 @@ fun RoomCard(
                 }
             }
             if (expandedState) {
-                Text(
-                    text = description,
-                    fontSize = descriptionFontSize,
-                    fontWeight = descriptionFontWeight,
-                    maxLines = descriptionMaxLines,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Column(verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.Start) {
+                    Text(text = "Available : $isAvailable",
+                        style = MaterialTheme.typography.bodyLarge)
+                    Text(text = "Monthly rent : $rent rsd",
+                        style = MaterialTheme.typography.bodyLarge)
+                    Row (
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text(text = "Number of people in room : $numberOfPeople",
+                            style = MaterialTheme.typography.bodyLarge)
+                        Button(onClick = {
+                            //navigate to details screen
+                        }) {
+                            Text(text = "See details")
+                        }
+                    }
+                }
             }
         }
     }
