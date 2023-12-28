@@ -6,5 +6,6 @@ data class SettingsItems(
     val title: String,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector,
-    val badgeCount: Int? = null
+    val badgeCount: Int? = null,
+    val route : String
 )

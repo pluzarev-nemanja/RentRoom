@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val roomsViewModel = hiltViewModel<RoomsViewModel>()
+                    val roomsViewModel  = hiltViewModel<RoomsViewModel>()
                     MainScreen(
                         allRooms = roomsViewModel.roomsList
                     )
