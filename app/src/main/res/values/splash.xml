@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.RentProject.MySplash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FFD369</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/avd_house</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="postSplashScreenTheme">@style/Theme.RentProject</item>
+    </style>
+</resources>
