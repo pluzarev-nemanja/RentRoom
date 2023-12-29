@@ -1,26 +1,31 @@
 package com.example.rentproject.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.rentproject.domain.model.Room
 import com.example.rentproject.presentation.home.HomeScreen
 import com.example.rentproject.presentation.room_details.RoomDetailsScreen
+import com.example.rentproject.presentation.rooms.RoomsViewModel
 import com.example.rentproject.presentation.settings.SettingsScreen
 import com.example.rentproject.presentation.util.Screen
 
 @Composable
 fun Navigation(
     navController: NavHostController,
-    allRooms: List<Room>
+    roomsViewModel: RoomsViewModel = hiltViewModel()
 ) {
 
     NavHost(navController = navController, startDestination = Screen.HomeScreen.route) {
 
         composable(route = Screen.HomeScreen.route) {
             HomeScreen(
-                allRooms = allRooms,
+                allRooms = roomsViewModel.roomsList,
+                saveNavigatedRoom = { room->
+                    roomsViewModel.saveNavigatedRoom(room)
+                },
                 navController = navController
             )
         }
@@ -30,7 +35,10 @@ fun Navigation(
         }
 
         composable(route = Screen.RoomDetailsScreen.route) {
-            RoomDetailsScreen()
+            RoomDetailsScreen(
+                room = roomsViewModel.navigatedRoom.value,
+                navController = navController
+            )
         }
     }
 }

@@ -80,7 +80,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     allRooms: List<Room>,
-    navController: NavController
+    navController: NavController,
+    saveNavigatedRoom : (Room?) -> Unit
 ) {
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -217,7 +218,8 @@ fun HomeScreen(
                         FloorPage(
                             floorName = RoomTabs.entries[selectedTabIndex.value].text,
                             roomsList = allRooms,
-                            navController = navController
+                            navController = navController,
+                            saveNavigatedRoom = saveNavigatedRoom
                         )
                     }
                 }
@@ -231,7 +233,9 @@ fun HomeScreen(
 fun FloorPage(
     floorName: String,
     roomsList: List<Room>,
-    navController: NavController
+    navController: NavController,
+    saveNavigatedRoom : (Room?) -> Unit
+
 ) {
     Column(
         modifier = Modifier
@@ -271,7 +275,9 @@ fun FloorPage(
                         available = room.available,
                         rent = room.rent,
                         numberOfPeople = room.numberOfPeople,
-                        navController = navController
+                        navController = navController,
+                        room = room,
+                        saveNavigatedRoom = saveNavigatedRoom
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -291,7 +297,9 @@ fun RoomCard(
     available: Boolean,
     rent: Int,
     numberOfPeople: Int,
-    navController: NavController
+    navController: NavController,
+    saveNavigatedRoom : (Room?) -> Unit,
+    room: Room
 ) {
     var expandedState by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(
@@ -369,6 +377,7 @@ fun RoomCard(
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Button(onClick = {
+                            saveNavigatedRoom.invoke(room)
                             navController.navigate(Screen.RoomDetailsScreen.route)
                         }) {
                             Text(text = "See details")

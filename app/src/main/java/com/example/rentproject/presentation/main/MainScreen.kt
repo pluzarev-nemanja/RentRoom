@@ -10,9 +10,7 @@ import com.example.rentproject.presentation.navigation.Navigation
 import com.example.rentproject.presentation.rooms.RoomsViewModel
 
 @Composable
-fun MainScreen(
-    allRooms : List<Room>
-) {
+fun MainScreen() {
 
     val navController = rememberNavController()
 
@@ -21,7 +19,6 @@ fun MainScreen(
     ) {
         Navigation(
             navController = navController,
-            allRooms = allRooms
         )
     }
 

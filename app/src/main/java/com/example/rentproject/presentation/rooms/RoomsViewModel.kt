@@ -18,6 +18,7 @@ class RoomsViewModel @Inject constructor(
 
     var roomsList = mutableStateListOf<Room>()
     var room = mutableStateOf<Room?>(null)
+    var navigatedRoom = mutableStateOf<Room?>(null)
 
     init {
         viewModelScope.launch {
@@ -31,6 +32,9 @@ class RoomsViewModel @Inject constructor(
         }
     }
 
+    fun saveNavigatedRoom(room: Room?){
+        navigatedRoom.value = room
+    }
     fun deleteRoom(room: Room){
         viewModelScope.launch {
             roomUseCases.deleteRoom(room)
