@@ -7,7 +7,12 @@ import androidx.room.PrimaryKey
 data class Room(
     @PrimaryKey val roomId : Int,
     val available : Boolean,
-    val rent : Int,
+    val rent : Float,
     val numberOfPeople : Int,
+    val maxNumberOfPeople : Int,
+    val roomName : String,
+    val reservationPeriod : Int,
+    val totalIncome : Float,
+    val currency: String
 
 )

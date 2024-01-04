@@ -295,10 +295,10 @@ fun RoomCard(
     shape: Shape = MaterialTheme.shapes.medium,
     padding: Dp = 12.dp,
     available: Boolean,
-    rent: Int,
+    rent: Float,
     numberOfPeople: Int,
     navController: NavController,
-    saveNavigatedRoom : (Room?) -> Unit,
+    saveNavigatedRoom: (Room?) -> Unit,
     room: Room
 ) {
     var expandedState by remember { mutableStateOf(false) }

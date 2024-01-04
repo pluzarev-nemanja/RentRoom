@@ -1,23 +1,24 @@
 package com.example.rentproject.presentation.room_details
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.Card
@@ -26,11 +27,16 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -48,6 +54,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -61,6 +68,26 @@ fun RoomDetailsScreen(
     navController: NavController
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    var text by remember { mutableStateOf(room?.roomName) }
+    var available by remember{
+        mutableStateOf(room?.available)
+    }
+    var rent by remember {
+        mutableStateOf(room?.rent)
+    }
+    var maxNumOfPeople by remember {
+        mutableStateOf(room?.maxNumberOfPeople)
+    }
+    var numOfPeople by remember {
+        mutableStateOf(room?.numberOfPeople)
+    }
+    var reservationPeriod by remember {
+        mutableStateOf(room?.reservationPeriod)
+    }
+    var totalIncome by remember {
+        mutableStateOf(room?.totalIncome)
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -86,9 +113,10 @@ fun RoomDetailsScreen(
     ) { paddingValues ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .fillMaxWidth()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.SpaceAround
         ) {
             Card(
@@ -100,8 +128,7 @@ fun RoomDetailsScreen(
                         strokeWidth = 4.dp,
                         durationMillis = 2000,
                         shape = RoundedCornerShape(20.dp)
-                    )
-                ,
+                    ),
                 shape = RoundedCornerShape(20.dp),
             ) {
                 Box(
@@ -109,14 +136,203 @@ fun RoomDetailsScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Room ${room?.roomId}",
+                        text = room?.roomName.toString(),
                         fontSize = MaterialTheme.typography.headlineSmall.fontSize,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+
             }
+
+            Text(
+                text = "Change details about ${room?.roomName} : ",
+                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(8.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Room name : ",
+                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(8.dp)
+                )
+                OutlinedTextField(value = text.toString(), onValueChange = {
+                    text = it
+                },
+                    label = { Text("Change Name") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(15.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Room availability : ",
+                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(8.dp)
+                )
+                OutlinedTextField(value = available.toString(), onValueChange = {
+                    available = it.toBoolean()
+                },
+                    label = { Text("Availability") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(15.dp),
+                    readOnly = true
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Monthly rent : ",
+                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(8.dp)
+                )
+                OutlinedTextField(value = rent.toString(), onValueChange = {
+                    rent = it.toFloat()
+                },
+                    label = { Text("Change price") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(15.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Max number of people : ",
+                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(8.dp)
+                )
+                OutlinedTextField(value = maxNumOfPeople.toString(), onValueChange = {
+                    maxNumOfPeople = it.toInt()
+                },
+                    label = { Text("Change number") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(15.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Peoples in room : ",
+                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(8.dp)
+                )
+                OutlinedTextField(value = numOfPeople.toString(), onValueChange = {
+                    numOfPeople = it.toInt()
+                },
+                    label = { Text("Change number") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(15.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Reservation period : ",
+                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(8.dp)
+                )
+                OutlinedTextField(value = reservationPeriod.toString(), onValueChange = {
+                    reservationPeriod = it.toInt()
+                },
+                    label = { Text("Change period") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(15.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Total income : ",
+                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(8.dp)
+                )
+                OutlinedTextField(value = totalIncome.toString(), onValueChange = {
+                    totalIncome = it.toFloat()
+                },
+                    label = { Text("Income") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(15.dp),
+                    readOnly = true
+                )
+            }
+
+
 
         }
     }

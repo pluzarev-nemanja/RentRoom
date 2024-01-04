@@ -17,8 +17,13 @@ class InsertRooms(
             roomList +=Room(
                 roomId = i,
                 available = true,
-                rent = 0,
-                numberOfPeople = 0
+                rent =  0F,
+                numberOfPeople = 0,
+                maxNumberOfPeople = 0,
+                roomName = "Room $i",
+                reservationPeriod = 0,
+                totalIncome = 0F,
+                currency = "rsd"
             )
         }
         return roomList
