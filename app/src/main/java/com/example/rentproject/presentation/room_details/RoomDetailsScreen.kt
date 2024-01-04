@@ -21,6 +21,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.AttachMoney
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Dangerous
+import androidx.compose.material.icons.outlined.EmojiPeople
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -200,7 +205,13 @@ fun RoomDetailsScreen(
                     label = { Text("Availability") },
                     singleLine = true,
                     shape = RoundedCornerShape(15.dp),
-                    readOnly = true
+                    readOnly = true,
+                    trailingIcon = {
+                        if(available == true)
+                        Icon(imageVector = Icons.Outlined.CheckCircle, contentDescription = "check")
+                        else
+                            Icon(imageVector = Icons.Outlined.Dangerous, contentDescription = "not checked")
+                    }
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -225,7 +236,10 @@ fun RoomDetailsScreen(
                     label = { Text("Change price") },
                     singleLine = true,
                     shape = RoundedCornerShape(15.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    trailingIcon = {
+                        Icon(imageVector = Icons.Outlined.AttachMoney, contentDescription = "money")
+                    }
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -250,7 +264,10 @@ fun RoomDetailsScreen(
                     label = { Text("Change number") },
                     singleLine = true,
                     shape = RoundedCornerShape(15.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    trailingIcon = {
+                        Icon(imageVector = Icons.Outlined.EmojiPeople, contentDescription = "money")
+                    }
 
                 )
             }
@@ -276,7 +293,10 @@ fun RoomDetailsScreen(
                     label = { Text("Change number") },
                     singleLine = true,
                     shape = RoundedCornerShape(15.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    trailingIcon = {
+                        Icon(imageVector = Icons.Outlined.EmojiPeople, contentDescription = "money")
+                    }
 
                 )
             }
@@ -302,7 +322,10 @@ fun RoomDetailsScreen(
                     label = { Text("Change period") },
                     singleLine = true,
                     shape = RoundedCornerShape(15.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    trailingIcon = {
+                        Icon(imageVector = Icons.Outlined.CalendarMonth, contentDescription = "money")
+                    }
 
                 )
             }
@@ -328,7 +351,10 @@ fun RoomDetailsScreen(
                     label = { Text("Income") },
                     singleLine = true,
                     shape = RoundedCornerShape(15.dp),
-                    readOnly = true
+                    readOnly = true,
+                    trailingIcon = {
+                        Icon(imageVector = Icons.Outlined.AttachMoney, contentDescription = "money")
+                    }
                 )
             }
 
