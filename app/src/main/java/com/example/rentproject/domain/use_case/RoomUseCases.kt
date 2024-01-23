@@ -5,5 +5,7 @@ data class RoomUseCases(
     val getRoomById: GetRoomById,
     val getRooms: GetRooms,
     val upsertRoom: UpsertRoom,
-    val insertRooms: InsertRooms
+    val insertRooms: InsertRooms,
+    val getFloorWithRooms: GetFloorWithRooms,
+    val insertFloors: InsertFloors
 )

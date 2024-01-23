@@ -5,7 +5,11 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
+import androidx.room.Update
 import androidx.room.Upsert
+import com.example.rentproject.data.data_source.relations.FloorWithRooms
+import com.example.rentproject.domain.model.Floor
 import com.example.rentproject.domain.model.Room
 import kotlinx.coroutines.flow.Flow
 
@@ -21,10 +25,18 @@ interface RoomDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertRooms(roomsList: MutableList<Room>)
 
-    @Upsert
+    @Update
     suspend fun upsertRoom(room: Room)
 
     @Delete
     suspend fun deleteRoom(room: Room)
+
+    @Transaction
+    @Query("SELECT * FROM floor WHERE floorId = :floorId")
+    fun getFloorWithRooms(floorId : Int) : Flow<List<FloorWithRooms>>
+
+    @Upsert
+    suspend fun insertFloors(floors: List<Floor>)
+
 
 }

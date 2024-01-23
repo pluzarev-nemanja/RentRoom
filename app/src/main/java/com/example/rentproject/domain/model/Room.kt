@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Room(
-    @PrimaryKey val roomId : Int,
+    @PrimaryKey(autoGenerate = true)val roomId : Int,
     val available : Boolean,
     val rent : Float,
     val numberOfPeople : Int,
@@ -13,6 +13,7 @@ data class Room(
     val roomName : String,
     val reservationPeriod : Int,
     val totalIncome : Float,
-    val currency: String
+    val currency: String,
+    val floorId : Int
 
 )

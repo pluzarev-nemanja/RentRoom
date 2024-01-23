@@ -22,7 +22,9 @@ fun Navigation(
 
         composable(route = Screen.HomeScreen.route) {
             HomeScreen(
-                allRooms = roomsViewModel.roomsList,
+                groundFloor = roomsViewModel.groundFloor,
+                firstFloor = roomsViewModel.firstFloor,
+                secondFloor = roomsViewModel.secondFloor,
                 saveNavigatedRoom = { room->
                     roomsViewModel.saveNavigatedRoom(room)
                 },

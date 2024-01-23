@@ -70,6 +70,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.rentproject.R
+import com.example.rentproject.data.data_source.relations.FloorWithRooms
+import com.example.rentproject.domain.model.Floor
 import com.example.rentproject.domain.model.Room
 import com.example.rentproject.presentation.util.RoomTabs
 import com.example.rentproject.presentation.util.Screen
@@ -79,9 +81,11 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
-    allRooms: List<Room>,
+    groundFloor: List<FloorWithRooms>,
+    firstFloor : List<FloorWithRooms>,
+    secondFloor : List<FloorWithRooms>,
     navController: NavController,
-    saveNavigatedRoom : (Room?) -> Unit
+    saveNavigatedRoom : (Room?) -> Unit,
 ) {
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -210,6 +214,13 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .weight(1f)
                 ) { page ->
+                    val floor by remember {
+                        when(page){
+                             0 -> mutableStateOf(groundFloor)
+                             1 -> mutableStateOf(firstFloor)
+                            else -> mutableStateOf(secondFloor)
+                        }
+                    }
                     Box(
                         modifier = Modifier
                             .fillMaxSize(),
@@ -217,7 +228,7 @@ fun HomeScreen(
                     ) {
                         FloorPage(
                             floorName = RoomTabs.entries[selectedTabIndex.value].text,
-                            roomsList = allRooms,
+                            roomsList = if(floor.isNotEmpty()) floor.first().rooms else emptyList(),
                             navController = navController,
                             saveNavigatedRoom = saveNavigatedRoom
                         )

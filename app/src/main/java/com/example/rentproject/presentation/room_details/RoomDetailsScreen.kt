@@ -75,7 +75,9 @@ fun RoomDetailsScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var text by remember { mutableStateOf(room?.roomName) }
     var available by remember{
-        mutableStateOf(room?.available)
+        mutableStateOf(
+            if(room?.available == true) "Yes" else "No"
+        )
     }
     var rent by remember {
         mutableStateOf(room?.rent)
@@ -199,15 +201,14 @@ fun RoomDetailsScreen(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(8.dp)
                 )
-                OutlinedTextField(value = available.toString(), onValueChange = {
-                    available = it.toBoolean()
+                OutlinedTextField(value = available, onValueChange = {
                 },
                     label = { Text("Availability") },
                     singleLine = true,
                     shape = RoundedCornerShape(15.dp),
                     readOnly = true,
                     trailingIcon = {
-                        if(available == true)
+                        if(available == "Yes")
                         Icon(imageVector = Icons.Outlined.CheckCircle, contentDescription = "check")
                         else
                             Icon(imageVector = Icons.Outlined.Dangerous, contentDescription = "not checked")

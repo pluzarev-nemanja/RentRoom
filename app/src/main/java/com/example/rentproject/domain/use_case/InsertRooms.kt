@@ -14,6 +14,8 @@ class InsertRooms(
     private fun createRooms(numberOfRooms: Int) : MutableList<Room>{
         val roomList = mutableListOf<Room>()
         for(i: Int in 1..numberOfRooms){
+            val floorId: Int = if(i in 6..11) 1
+            else 2
             roomList +=Room(
                 roomId = i,
                 available = true,
@@ -23,7 +25,8 @@ class InsertRooms(
                 roomName = "Room $i",
                 reservationPeriod = 0,
                 totalIncome = 0F,
-                currency = "rsd"
+                currency = "rsd",
+                floorId = floorId
             )
         }
         return roomList

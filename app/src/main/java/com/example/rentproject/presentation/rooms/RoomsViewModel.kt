@@ -1,9 +1,11 @@
 package com.example.rentproject.presentation.rooms
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.rentproject.data.data_source.relations.FloorWithRooms
 import com.example.rentproject.domain.model.Room
 import com.example.rentproject.domain.use_case.RoomUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,22 +18,46 @@ class RoomsViewModel @Inject constructor(
     private val roomUseCases: RoomUseCases
 ) : ViewModel() {
 
-    var roomsList = mutableStateListOf<Room>()
     var room = mutableStateOf<Room?>(null)
     var navigatedRoom = mutableStateOf<Room?>(null)
+    var groundFloor = mutableStateListOf<FloorWithRooms>()
+    var firstFloor = mutableStateListOf<FloorWithRooms>()
+    var secondFloor = mutableStateListOf<FloorWithRooms>()
 
     init {
+        insertRooms(20)
         viewModelScope.launch {
-            roomUseCases.insertRooms(5)
+            roomUseCases.insertFloors(3,"Floor")
         }
         viewModelScope.launch {
-            roomUseCases.getRooms().collect{rooms->
-                roomsList.clear()
-                roomsList +=rooms
+            roomUseCases.getFloorWithRooms(0).collect{ floorWithRooms->
+                groundFloor.clear()
+                groundFloor += floorWithRooms
             }
         }
+        viewModelScope.launch {
+
+            roomUseCases.getFloorWithRooms(1).collect{ floorWithRooms->
+                firstFloor.clear()
+                firstFloor += floorWithRooms
+
+            }
+        }
+        viewModelScope.launch {
+            roomUseCases.getFloorWithRooms(2).collect{ floorWithRooms->
+                secondFloor.clear()
+                secondFloor += floorWithRooms
+
+            }
+        }
+
     }
 
+    private fun insertRooms(numberOfRooms : Int){
+        viewModelScope.launch {
+            roomUseCases.insertRooms(numberOfRooms = numberOfRooms)
+        }
+    }
     fun saveNavigatedRoom(room: Room?){
         navigatedRoom.value = room
     }

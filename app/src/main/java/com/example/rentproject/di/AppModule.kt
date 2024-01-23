@@ -6,8 +6,10 @@ import com.example.rentproject.data.data_source.RoomDataBase
 import com.example.rentproject.data.repository.RoomRepositoryImpl
 import com.example.rentproject.domain.repository.RoomRepository
 import com.example.rentproject.domain.use_case.DeleteRoom
+import com.example.rentproject.domain.use_case.GetFloorWithRooms
 import com.example.rentproject.domain.use_case.GetRoomById
 import com.example.rentproject.domain.use_case.GetRooms
+import com.example.rentproject.domain.use_case.InsertFloors
 import com.example.rentproject.domain.use_case.InsertRooms
 import com.example.rentproject.domain.use_case.RoomUseCases
 import com.example.rentproject.domain.use_case.UpsertRoom
@@ -47,7 +49,9 @@ object AppModule {
             getRoomById = GetRoomById(repository),
             getRooms = GetRooms(repository),
             upsertRoom = UpsertRoom(repository),
-            insertRooms = InsertRooms(repository)
+            insertRooms = InsertRooms(repository),
+            getFloorWithRooms = GetFloorWithRooms(repository),
+            insertFloors = InsertFloors(repository)
         )
     }
 
