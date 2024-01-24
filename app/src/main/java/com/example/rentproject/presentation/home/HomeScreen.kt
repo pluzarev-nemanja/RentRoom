@@ -71,7 +71,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.rentproject.R
 import com.example.rentproject.data.data_source.relations.FloorWithRooms
-import com.example.rentproject.domain.model.Floor
 import com.example.rentproject.domain.model.Room
 import com.example.rentproject.presentation.util.RoomTabs
 import com.example.rentproject.presentation.util.Screen
@@ -82,10 +81,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     groundFloor: List<FloorWithRooms>,
-    firstFloor : List<FloorWithRooms>,
-    secondFloor : List<FloorWithRooms>,
+    firstFloor: List<FloorWithRooms>,
+    secondFloor: List<FloorWithRooms>,
     navController: NavController,
-    saveNavigatedRoom : (Room?) -> Unit,
+    saveNavigatedRoom: (Room?) -> Unit,
 ) {
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -215,10 +214,17 @@ fun HomeScreen(
                         .weight(1f)
                 ) { page ->
                     val floor by remember {
-                        when(page){
-                             0 -> mutableStateOf(groundFloor)
-                             1 -> mutableStateOf(firstFloor)
+                        when (page) {
+                            0 -> mutableStateOf(groundFloor)
+                            1 -> mutableStateOf(firstFloor)
                             else -> mutableStateOf(secondFloor)
+                        }
+                    }
+                    val floorImage by remember {
+                        when (page) {
+                            0 -> mutableIntStateOf(R.drawable.dole)
+                            1 -> mutableIntStateOf(R.drawable.prvi)
+                            else -> mutableIntStateOf(R.drawable.potkrovlje)
                         }
                     }
                     Box(
@@ -228,9 +234,10 @@ fun HomeScreen(
                     ) {
                         FloorPage(
                             floorName = RoomTabs.entries[selectedTabIndex.value].text,
-                            roomsList = if(floor.isNotEmpty()) floor.first().rooms else emptyList(),
+                            roomsList = if (floor.isNotEmpty()) floor.first().rooms else emptyList(),
                             navController = navController,
-                            saveNavigatedRoom = saveNavigatedRoom
+                            saveNavigatedRoom = saveNavigatedRoom,
+                            floorImage = floorImage
                         )
                     }
                 }
@@ -245,7 +252,8 @@ fun FloorPage(
     floorName: String,
     roomsList: List<Room>,
     navController: NavController,
-    saveNavigatedRoom : (Room?) -> Unit
+    saveNavigatedRoom: (Room?) -> Unit,
+    floorImage : Int
 
 ) {
     Column(
@@ -265,9 +273,9 @@ fun FloorPage(
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
-                    model = R.mipmap.ic_launcher,
+                    model = floorImage,
                     contentDescription = null,
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.FillBounds,
                     modifier = Modifier.clip(RoundedCornerShape(20.dp))
                 )
             }
@@ -282,7 +290,7 @@ fun FloorPage(
             LazyColumn {
                 items(roomsList) { room ->
                     RoomCard(
-                        title = "Room ${room.roomId}",
+                        title = room.roomName,
                         available = room.available,
                         rent = room.rent,
                         numberOfPeople = room.numberOfPeople,

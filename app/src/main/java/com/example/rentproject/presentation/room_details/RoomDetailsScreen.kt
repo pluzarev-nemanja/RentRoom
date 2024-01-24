@@ -39,6 +39,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,12 +59,15 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import com.example.rentproject.R
 import com.example.rentproject.domain.model.Room
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,10 +78,17 @@ fun RoomDetailsScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var text by remember { mutableStateOf(room?.roomName) }
-    var available by remember{
+    val available by remember{
         mutableStateOf(
             if(room?.available == true) "Yes" else "No"
         )
+    }
+    val floorImage by remember {
+        when (room?.floorId) {
+            0 -> mutableIntStateOf(R.drawable.dole)
+            1 -> mutableIntStateOf(R.drawable.prvi)
+            else -> mutableIntStateOf(R.drawable.potkrovlje)
+        }
     }
     var rent by remember {
         mutableStateOf(room?.rent)
@@ -142,12 +153,11 @@ fun RoomDetailsScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = room?.roomName.toString(),
-                        fontSize = MaterialTheme.typography.headlineSmall.fontSize,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                    AsyncImage(
+                        model = floorImage,
+                        contentDescription = null,
+                        contentScale = ContentScale.FillBounds,
+                        modifier = Modifier.clip(RoundedCornerShape(20.dp))
                     )
                 }
 
