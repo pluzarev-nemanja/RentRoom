@@ -6,6 +6,9 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.MagnifierStyle
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.magnifier
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -48,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
@@ -59,18 +64,20 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.rentproject.R
 import com.example.rentproject.domain.model.Room
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun RoomDetailsScreen(
     room: Room?,
@@ -149,8 +156,32 @@ fun RoomDetailsScreen(
                     ),
                 shape = RoundedCornerShape(20.dp),
             ) {
+                var magnifierCenter by remember {
+                    mutableStateOf(Offset.Unspecified)
+                }
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize()
+                        .pointerInput(Unit) {
+                            detectDragGestures(
+                                // Show the magnifier in the initial position
+                                onDragStart = { magnifierCenter = it },
+                                // Magnifier follows the pointer during a drag event
+                                onDrag = { _, delta ->
+                                    magnifierCenter = magnifierCenter.plus(delta)
+                                },
+                                // Hide the magnifier when a user ends the drag movement.
+                                onDragEnd = { magnifierCenter = Offset.Unspecified },
+                                onDragCancel = { magnifierCenter = Offset.Unspecified },
+                            )
+                        }
+                        .magnifier(
+                            sourceCenter = { magnifierCenter},
+                            zoom = 3f,
+                            style = MagnifierStyle(
+                                size = DpSize(height = 120.dp, width = 150.dp),
+                                cornerRadius = 20.dp
+                            )
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(

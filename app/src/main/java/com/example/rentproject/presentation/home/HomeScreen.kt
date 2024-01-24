@@ -5,7 +5,9 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.MagnifierStyle
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.magnifier
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -59,12 +62,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -247,6 +253,7 @@ fun HomeScreen(
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FloorPage(
     floorName: String,
@@ -264,12 +271,34 @@ fun FloorPage(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            var magnifierCenter by remember {
+                mutableStateOf(Offset.Unspecified)
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
                     .clip(RoundedCornerShape(20.dp))
-                    .background(MaterialTheme.colorScheme.onBackground),
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            // Show the magnifier in the initial position
+                            onDragStart = { magnifierCenter = it },
+                            // Magnifier follows the pointer during a drag event
+                            onDrag = { _, delta ->
+                                magnifierCenter = magnifierCenter.plus(delta)
+                            },
+                            // Hide the magnifier when a user ends the drag movement.
+                            onDragEnd = { magnifierCenter = Offset.Unspecified },
+                            onDragCancel = { magnifierCenter = Offset.Unspecified },
+                        )
+                    }
+                    .magnifier(
+                        sourceCenter = { magnifierCenter},
+                        zoom = 3f,
+                        style = MagnifierStyle(
+                            size = DpSize(height = 120.dp, width = 150.dp),
+                            cornerRadius = 20.dp
+                        )),
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
