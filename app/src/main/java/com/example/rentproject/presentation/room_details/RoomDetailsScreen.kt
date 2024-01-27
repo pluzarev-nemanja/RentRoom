@@ -175,7 +175,7 @@ fun RoomDetailsScreen(
                             )
                         }
                         .magnifier(
-                            sourceCenter = { magnifierCenter},
+                            sourceCenter = { if(magnifierCenter!= Offset.Unspecified)magnifierCenter - Offset(0f,200f) else magnifierCenter},
                             zoom = 3f,
                             style = MagnifierStyle(
                                 size = DpSize(height = 120.dp, width = 150.dp),
