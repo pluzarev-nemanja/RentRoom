@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.rentproject.data.data_source.RoomDataBase
 import com.example.rentproject.data.repository.RoomRepositoryImpl
 import com.example.rentproject.domain.repository.RoomRepository
+import com.example.rentproject.domain.use_case.DeletePerson
 import com.example.rentproject.domain.use_case.DeleteRoom
 import com.example.rentproject.domain.use_case.GetFloorWithRooms
 import com.example.rentproject.domain.use_case.GetRoomById
@@ -12,6 +13,7 @@ import com.example.rentproject.domain.use_case.GetRooms
 import com.example.rentproject.domain.use_case.InsertFloors
 import com.example.rentproject.domain.use_case.InsertRooms
 import com.example.rentproject.domain.use_case.RoomUseCases
+import com.example.rentproject.domain.use_case.UpsertPerson
 import com.example.rentproject.domain.use_case.UpsertRoom
 import dagger.Module
 import dagger.Provides
@@ -51,7 +53,9 @@ object AppModule {
             upsertRoom = UpsertRoom(repository),
             insertRooms = InsertRooms(repository),
             getFloorWithRooms = GetFloorWithRooms(repository),
-            insertFloors = InsertFloors(repository)
+            insertFloors = InsertFloors(repository),
+            upsertPerson = UpsertPerson(repository),
+            deletePerson = DeletePerson(repository)
         )
     }
 

@@ -10,6 +10,7 @@ import androidx.room.Update
 import androidx.room.Upsert
 import com.example.rentproject.data.data_source.relations.FloorWithRooms
 import com.example.rentproject.domain.model.Floor
+import com.example.rentproject.domain.model.Person
 import com.example.rentproject.domain.model.Room
 import kotlinx.coroutines.flow.Flow
 
@@ -38,5 +39,10 @@ interface RoomDao {
     @Upsert
     suspend fun insertFloors(floors: List<Floor>)
 
+    @Upsert
+    suspend fun upsertPerson(person: Person)
+
+    @Delete
+    suspend fun deletePerson(person: Person)
 
 }
