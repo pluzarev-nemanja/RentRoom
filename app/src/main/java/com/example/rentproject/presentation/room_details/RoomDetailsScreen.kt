@@ -100,12 +100,7 @@ fun RoomDetailsScreen(
     var rent by remember {
         mutableStateOf(room?.rent)
     }
-    var maxNumOfPeople by remember {
-        mutableStateOf(room?.maxNumberOfPeople)
-    }
-    var numOfPeople by remember {
-        mutableStateOf(room?.numberOfPeople)
-    }
+
     var reservationPeriod by remember {
         mutableStateOf(room?.reservationPeriod)
     }
@@ -120,7 +115,7 @@ fun RoomDetailsScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(text = "Room Details", style = MaterialTheme.typography.headlineSmall)
+                    Text(text = "Bed Details", style = MaterialTheme.typography.headlineSmall)
                 },
                 navigationIcon = {
                     IconButton(onClick = {
@@ -211,7 +206,7 @@ fun RoomDetailsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Room name : ",
+                    text = "Bed name : ",
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
@@ -235,7 +230,7 @@ fun RoomDetailsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Room availability : ",
+                    text = "Bed availability : ",
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
@@ -265,7 +260,7 @@ fun RoomDetailsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Monthly rent : ",
+                    text = "Daily rent : ",
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
@@ -285,64 +280,7 @@ fun RoomDetailsScreen(
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Max number of people : ",
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(8.dp)
-                )
-                OutlinedTextField(value = maxNumOfPeople.toString(), onValueChange = {
-                    maxNumOfPeople = it.toInt()
-                },
-                    label = { Text("Change number") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(15.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    trailingIcon = {
-                        Icon(imageVector = Icons.Outlined.EmojiPeople, contentDescription = "money")
-                    }
 
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Peoples in room : ",
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(8.dp)
-                )
-                OutlinedTextField(value = numOfPeople.toString(), onValueChange = {
-                    numOfPeople = it.toInt()
-                },
-                    label = { Text("Change number") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(15.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    trailingIcon = {
-                        Icon(imageVector = Icons.Outlined.EmojiPeople, contentDescription = "money")
-                    }
-
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

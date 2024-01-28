@@ -25,7 +25,7 @@ class RoomsViewModel @Inject constructor(
     var secondFloor = mutableStateListOf<FloorWithRooms>()
 
     init {
-        insertRooms(20)
+        insertRooms(19)
         viewModelScope.launch {
             roomUseCases.insertFloors(3,"Floor")
         }

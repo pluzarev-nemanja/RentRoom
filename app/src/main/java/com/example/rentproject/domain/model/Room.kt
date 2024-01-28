@@ -8,12 +8,9 @@ data class Room(
     @PrimaryKey(autoGenerate = true)val roomId : Int,
     val available : Boolean,
     val rent : Float,
-    val numberOfPeople : Int,
-    val maxNumberOfPeople : Int,
     val roomName : String,
     val reservationPeriod : Int,
     val totalIncome : Float,
     val currency: String,
     val floorId : Int
-
 )

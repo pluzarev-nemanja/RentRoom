@@ -314,7 +314,7 @@ fun FloorPage(
 
         }
         Column(horizontalAlignment = Alignment.Start) {
-            Text(text = "All rooms : ")
+            Text(text = "All beds : ")
             Spacer(modifier = Modifier.height(8.dp))
             LazyColumn {
                 items(roomsList) { room ->
@@ -322,7 +322,6 @@ fun FloorPage(
                         title = room.roomName,
                         available = room.available,
                         rent = room.rent,
-                        numberOfPeople = room.numberOfPeople,
                         navController = navController,
                         room = room,
                         saveNavigatedRoom = saveNavigatedRoom
@@ -344,7 +343,6 @@ fun RoomCard(
     padding: Dp = 12.dp,
     available: Boolean,
     rent: Float,
-    numberOfPeople: Int,
     navController: NavController,
     saveNavigatedRoom: (Room?) -> Unit,
     room: Room
@@ -411,17 +409,13 @@ fun RoomCard(
                         text = "Available : $isAvailable",
                         style = MaterialTheme.typography.bodyLarge
                     )
-                    Text(
-                        text = "Monthly rent : $rent rsd",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Number of people in room : $numberOfPeople",
+                            text = "Monthly rent : $rent rsd",
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Button(onClick = {

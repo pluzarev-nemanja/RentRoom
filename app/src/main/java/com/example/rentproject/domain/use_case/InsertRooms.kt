@@ -15,23 +15,21 @@ class InsertRooms(
         val roomList = mutableListOf<Room>()
         var roomNum = 1
         for(i: Int in 1..numberOfRooms){
-            val floorId: Int = if(i in 4..15) 1
+            val floorId: Int = if(i in 4..14) 1
             else if (i < 4) 0
             else 2
 
             if(i == 4) roomNum = 1
-            if(i == 16) roomNum = 1
+            if(i == 15) roomNum = 1
             val roomName : String = when(i){
                 in 0..3 -> "D $roomNum"
-                in 4..15 -> "S $roomNum"
+                in 4..14 -> "S $roomNum"
                 else -> "P $roomNum"
             }
             roomList +=Room(
                 roomId = i,
                 available = true,
                 rent =  0F,
-                numberOfPeople = 0,
-                maxNumberOfPeople = 0,
                 roomName = roomName,
                 reservationPeriod = 0,
                 totalIncome = 0F,
