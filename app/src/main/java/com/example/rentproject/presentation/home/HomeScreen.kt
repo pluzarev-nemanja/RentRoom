@@ -1,6 +1,7 @@
 package com.example.rentproject.presentation.home
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -49,6 +50,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -64,24 +66,35 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.rentproject.R
 import com.example.rentproject.data.data_source.relations.FloorWithRooms
 import com.example.rentproject.domain.model.Room
 import com.example.rentproject.presentation.util.RoomTabs
 import com.example.rentproject.presentation.util.Screen
 import com.example.rentproject.presentation.util.SettingsItems
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlin.math.PI
+import kotlin.math.sin
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -113,14 +126,22 @@ fun HomeScreen(
             route = Screen.SettingsScreen.route
         ),
     )
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val drawerState = rememberAnimatedDrawerState(
+        drawerWidth = 230.dp,
+        drawerMode = DrawerMode.SlideBehind,
+    )
     var selectedItemIndex by rememberSaveable {
         mutableIntStateOf(0)
     }
+    var expanded by remember { mutableStateOf(false) }
+    val fraction by animateFloatAsState(
+        targetValue = if (expanded) 1f else 0f,
+        animationSpec = tween(durationMillis = 800), label = "",
+    )
 
-    ModalNavigationDrawer(
+    AnimatedDrawer(
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet{
                 Spacer(modifier = Modifier.height(16.dp))
                 items.forEachIndexed { index, item ->
                     NavigationDrawerItem(
@@ -129,11 +150,11 @@ fun HomeScreen(
                         },
                         selected = index == selectedItemIndex,
                         onClick = {
-                            navController.navigate(item.route)
-                            selectedItemIndex = index
                             scope.launch {
                                 drawerState.close()
                             }
+                            navController.navigate(item.route)
+                            selectedItemIndex = index
                         },
                         icon = {
                             Icon(
@@ -149,12 +170,24 @@ fun HomeScreen(
                             }
                         },
                         modifier = Modifier
-                            .padding(NavigationDrawerItemDefaults.ItemPadding)
+                            .padding(NavigationDrawerItemDefaults.ItemPadding),
                     )
                 }
             }
         },
-        drawerState = drawerState
+        state = drawerState,
+        background = {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(R.drawable.ic_launcher_background)
+                    .crossfade(true)
+                    .build(),
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                contentDescription = null,
+            )
+        },
+        modifier = Modifier.fillMaxSize()
     ) {
         Scaffold(
             modifier = Modifier
@@ -185,6 +218,11 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
+                    .graphicsLayer {
+                        transformOrigin = TransformOrigin(pivotFractionX = 0f, pivotFractionY = .5f)
+                        scaleX = (1f - .2f * fraction)
+                        scaleY = (1f - .2f * fraction)
+                    }
             ) {
                 TabRow(
                     selectedTabIndex = selectedTabIndex.value,
@@ -429,4 +467,213 @@ fun RoomCard(
             }
         }
     }
+}
+@Stable
+interface AnimatedDrawerState {
+    var density: Float
+    val drawerWidth: Dp
+
+    val drawerTranslationX: Float
+    val drawerElevation: Float
+
+    val backgroundTranslationX: Float
+    val backgroundAlpha: Float
+
+    val contentScaleX: Float
+    val contentScaleY: Float
+    val contentTranslationX: Float
+    val contentTransformOrigin: TransformOrigin
+
+    suspend fun open()
+    suspend fun close()
+}
+
+private const val AnimationDurationMillis = 600
+private const val DrawerMaxElevation = 8f
+
+sealed interface DrawerMode {
+    data class SlideRight(
+        val drawerGap: Dp
+    ) : DrawerMode
+
+    object SlideBehind : DrawerMode
+}
+
+private val DrawerMode.scaleFactor: Float
+    get() = when (this) {
+        is DrawerMode.SlideRight -> .2f
+        DrawerMode.SlideBehind -> .4f
+    }
+
+private fun DrawerMode.translationX(
+    drawerWidth: Float,
+    fraction: Float,
+    density: Float,
+) = when (this) {
+    is DrawerMode.SlideRight -> (drawerWidth + drawerGap.value * density) * fraction
+    DrawerMode.SlideBehind -> ((.6f * drawerWidth) * sin(fraction * PI)).toFloat()
+}
+
+private val DrawerMode.transformOrigin: TransformOrigin
+    get() = when (this) {
+        is DrawerMode.SlideRight -> TransformOrigin(pivotFractionX = 0f, pivotFractionY = .5f)
+        DrawerMode.SlideBehind -> TransformOrigin(pivotFractionX = 1f, pivotFractionY = .5f)
+    }
+
+@Stable
+class AnimatedDrawerStateImpl(
+    override val drawerWidth: Dp,
+    private val drawerMode: DrawerMode,
+) : AnimatedDrawerState {
+
+    private val animation = Animatable(0f)
+    private val animationY = Animatable(0f)
+
+    override var density by mutableStateOf(1f)
+
+    override val drawerTranslationX: Float
+        get() = -drawerWidth.value * density * (1f - animation.value)
+
+    override val drawerElevation: Float
+        get() = DrawerMaxElevation * animation.value
+
+    override val backgroundTranslationX: Float
+        get() = animation.value * drawerWidth.value * density
+
+    override val backgroundAlpha: Float
+        get() = .25f * animation.value
+
+    override val contentScaleX: Float
+        get() = 1f - drawerMode.scaleFactor * animation.value
+
+    override val contentScaleY: Float
+        get() = 1f - drawerMode.scaleFactor * animationY.value
+
+    override val contentTranslationX: Float
+        get() = drawerMode.translationX(
+            drawerWidth = drawerWidth.value * density,
+            fraction = animation.value,
+            density = density,
+        )
+
+    override val contentTransformOrigin: TransformOrigin
+        get() = drawerMode.transformOrigin
+
+    override suspend fun open() {
+        coroutineScope {
+            launch {
+                animation.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(durationMillis = AnimationDurationMillis)
+                )
+            }
+            launch {
+                animationY.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(
+                        durationMillis = AnimationDurationMillis,
+                        delayMillis = AnimationDurationMillis / 4,
+                    ),
+                )
+            }
+        }
+    }
+
+    override suspend fun close() {
+        coroutineScope {
+            launch {
+                animation.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(durationMillis = AnimationDurationMillis)
+                )
+            }
+            launch {
+                animationY.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(
+                        durationMillis = AnimationDurationMillis,
+                        delayMillis = AnimationDurationMillis / 4,
+                    ),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun rememberAnimatedDrawerState(
+    drawerWidth: Dp,
+    drawerMode: DrawerMode,
+): AnimatedDrawerState = remember {
+    AnimatedDrawerStateImpl(
+        drawerWidth = drawerWidth,
+        drawerMode = drawerMode,
+    )
+}
+
+@Composable
+fun AnimatedDrawer(
+    modifier: Modifier = Modifier,
+    state: AnimatedDrawerState = rememberAnimatedDrawerState(
+        drawerWidth = 250.dp,
+        DrawerMode.SlideRight(drawerGap = 16.dp),
+    ),
+    drawerContent: @Composable () -> Unit,
+    background: @Composable () -> Unit = {},
+    content: @Composable () -> Unit,
+) {
+    Layout(
+        modifier = modifier,
+        content = {
+            drawerContent()
+            background()
+            content()
+        }
+    ) { measurables, constraints ->
+        state.density = density
+        val drawerWidthPx = state.drawerWidth.value * density
+        val (drawerContentMeasurable, backgroundMeasurable, contentMeasurable) = measurables
+        val drawerContentConstraints = Constraints.fixed(
+            width = drawerWidthPx.coerceAtMost(constraints.maxWidth.toFloat()).toInt(),
+            height = constraints.maxHeight,
+        )
+        val drawerContentPlaceable = drawerContentMeasurable.measure(drawerContentConstraints)
+        val contentConstraints = Constraints.fixed(
+            width = constraints.maxWidth,
+            height = constraints.maxHeight,
+        )
+        val contentPlaceable = contentMeasurable.measure(contentConstraints)
+        val backgroundPlaceable = backgroundMeasurable.measure(
+            Constraints.fixed(
+                width = constraints.maxWidth,
+                height = constraints.maxHeight,
+           )
+        )
+        layout(
+            width = constraints.maxWidth,
+            height = constraints.maxHeight,
+       ) {
+            backgroundPlaceable.placeRelativeWithLayer(
+                IntOffset.Zero
+            ) {
+                translationX = state.backgroundTranslationX
+                alpha = state.backgroundAlpha
+            }
+            contentPlaceable.placeRelativeWithLayer(
+                IntOffset.Zero,
+            ) {
+                transformOrigin = state.contentTransformOrigin
+                scaleX = state.contentScaleX
+                scaleY = state.contentScaleY
+                translationX = state.contentTranslationX
+            }
+            drawerContentPlaceable.placeRelativeWithLayer(
+                IntOffset.Zero,
+            ) {
+                translationX = state.drawerTranslationX
+                shadowElevation = state.drawerElevation
+            }
+        }
+
+}
 }
