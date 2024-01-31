@@ -1,6 +1,7 @@
 package com.example.rentproject.domain.repository
 
 import com.example.rentproject.data.data_source.relations.FloorWithRooms
+import com.example.rentproject.data.data_source.relations.RoomAndPerson
 import com.example.rentproject.domain.model.Floor
 import com.example.rentproject.domain.model.Person
 import com.example.rentproject.domain.model.Room
@@ -20,5 +21,6 @@ interface RoomRepository {
     suspend fun upsertPerson(person: Person)
 
     suspend fun deletePerson(person: Person)
+    fun getRoomAndPersonWithRoomId(roomId : Int): Flow<List<RoomAndPerson>>
 
 }

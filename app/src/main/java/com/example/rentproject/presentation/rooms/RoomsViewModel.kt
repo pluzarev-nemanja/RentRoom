@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.rentproject.data.data_source.relations.FloorWithRooms
+import com.example.rentproject.data.data_source.relations.RoomAndPerson
+import com.example.rentproject.domain.model.Person
 import com.example.rentproject.domain.model.Room
 import com.example.rentproject.domain.use_case.RoomUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +25,7 @@ class RoomsViewModel @Inject constructor(
     var groundFloor = mutableStateListOf<FloorWithRooms>()
     var firstFloor = mutableStateListOf<FloorWithRooms>()
     var secondFloor = mutableStateListOf<FloorWithRooms>()
+    var roomAndPerson = mutableStateListOf<RoomAndPerson>()
 
     init {
         insertRooms(19)
@@ -77,5 +80,26 @@ class RoomsViewModel @Inject constructor(
             room.value = roomUseCases.getRoomById(id)
         }
         return room.value
+    }
+
+    fun upsertPerson(person: Person){
+        viewModelScope.launch {
+            roomUseCases.upsertPerson(person)
+        }
+    }
+
+    fun deletePerson(person: Person){
+        viewModelScope.launch {
+            roomUseCases.deletePerson(person)
+        }
+    }
+
+    fun getRoomAndPerson(roomId : Int){
+        viewModelScope.launch {
+            roomUseCases.getRoomAndPerson(roomId).collect{
+                roomAndPerson.clear()
+                roomAndPerson += it
+            }
+        }
     }
 }

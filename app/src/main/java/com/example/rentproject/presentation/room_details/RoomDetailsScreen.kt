@@ -8,16 +8,20 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MagnifierStyle
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.magnifier
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,12 +34,21 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Dangerous
 import androidx.compose.material.icons.outlined.EmojiPeople
+import androidx.compose.material.icons.outlined.PersonPin
+import androidx.compose.material.icons.outlined.PersonPinCircle
+import androidx.compose.material.icons.outlined.PersonSearch
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -72,18 +85,255 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.rentproject.R
+import com.example.rentproject.data.data_source.relations.RoomAndPerson
+import com.example.rentproject.domain.model.Person
 import com.example.rentproject.domain.model.Room
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun RoomDetailsScreen(
     room: Room?,
-    navController: NavController
+    navController: NavHostController,
+    roomAndPerson: List<RoomAndPerson>,
+    upsertPerson : (Person) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val person by remember {
+        if(roomAndPerson.isNotEmpty())mutableStateOf(roomAndPerson.first().person) else mutableStateOf<Person?>(null)
+    }
+    var openDialog = remember { mutableStateOf(false) }
+    var name by remember {
+        mutableStateOf("")
+    }
+    var surname by remember {
+        mutableStateOf("")
+    }
+    var gender by remember {
+        mutableStateOf(false)
+    }
+
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(text = "Bed Details", style = MaterialTheme.typography.headlineSmall)
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED){
+                            navController.popBackStack()
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Outlined.ArrowBack,
+                            contentDescription = "Back icon"
+                        )
+                    }
+                },
+                scrollBehavior = scrollBehavior
+            )
+        }
+    ) { paddingValues ->
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        ) {
+
+            BedDetails(
+                paddingValues,
+                room
+            )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(paddingValues),
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.SpaceAround
+                ) {
+                    Divider(
+                        thickness = 3.dp,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(
+                            5.dp
+                        )
+                    )
+                    Text(
+                        text = "Change details about your guest : ",
+                        fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    if(person != null){
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Guest name : ",
+                                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                            OutlinedTextField(value = person?.personName.toString(), onValueChange = {
+                                person?.personName = it
+                            },
+                                label = { Text("First name") },
+                                singleLine = true,
+                                shape = RoundedCornerShape(15.dp),
+                                readOnly = true,
+                                trailingIcon = {
+                                    Icon(imageVector = Icons.Outlined.PersonPinCircle, contentDescription = "person")
+                                }
+                            )
+                        }
+                    }else{
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp),
+                            contentAlignment = Alignment.Center){
+
+                            Column(modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally) {
+                                AsyncImage(
+                                    model = R.drawable.undraw_no_data_re_kwbl,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.FillBounds,
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(20.dp))
+                                        .size(200.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                OutlinedButton(onClick = {
+                                    openDialog.value = !openDialog.value
+                                }) {
+                                    Text(text = "Add guest")
+                                }
+                            }
+
+                        }
+                    }
+
+                }
+        }
+        Box(modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center) {
+            val popupWidth = 300.dp
+            val popupHeight = 350.dp
+
+            if (openDialog.value) {
+
+                Popup(
+
+                    alignment = Alignment.Center,
+                    properties = PopupProperties(),
+                    onDismissRequest = {
+                        openDialog.value = false
+                    }
+                ) {
+
+                    Box(
+                        Modifier
+                            .size(popupWidth, popupHeight)
+                            .padding(top = 5.dp)
+                            .background(
+                                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.95f),
+                                RoundedCornerShape(20.dp)
+                            )
+                    ) {
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 20.dp, vertical = 15.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Top
+                        ) {
+                            Text(
+                                text = "Add new person to this bed:",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedTextField(value = name, onValueChange = {
+                                name = it
+                            },
+                                label = { Text("Name") },
+                                singleLine = true,
+                                shape = RoundedCornerShape(15.dp),
+                                trailingIcon = {
+                                    Icon(imageVector = Icons.Outlined.PersonPin, contentDescription = "person")
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            OutlinedTextField(value = surname, onValueChange = {
+                                surname = it
+                            },
+                                label = { Text("Surname") },
+                                singleLine = true,
+                                shape = RoundedCornerShape(15.dp),
+                                trailingIcon = {
+                                    Icon(imageVector = Icons.Outlined.PersonPin, contentDescription = "person")
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            OutlinedTextField(value = if(gender)"Male" else "Female", onValueChange = {
+                                if(it == "male" || it == "Male") gender = true
+                                else if (it == "female" || it == "Female") gender = false
+                            },
+                                label = { Text("Gender") },
+                                singleLine = true,
+                                shape = RoundedCornerShape(15.dp),
+                                trailingIcon = {
+                                    Icon(imageVector = Icons.Outlined.PersonSearch, contentDescription = "person")
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row (modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End){
+                                Button(onClick = {
+                                    openDialog.value = false
+                                }) {
+                                    Text(text = "Add person")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    }
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun BedDetails(
+    paddingValues: PaddingValues,
+    room: Room?
+) {
     var text by remember { mutableStateOf(room?.roomName) }
     val available by remember{
         mutableStateOf(
@@ -107,242 +357,250 @@ fun RoomDetailsScreen(
     var totalIncome by remember {
         mutableStateOf(room?.totalIncome)
     }
-
-    Scaffold(
+    Column(
         modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(text = "Bed Details", style = MaterialTheme.typography.headlineSmall)
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Outlined.ArrowBack,
-                            contentDescription = "Back icon"
-                        )
-                    }
-                },
-                scrollBehavior = scrollBehavior
-            )
-        }
-    ) { paddingValues ->
-        Column(
+            .fillMaxWidth()
+            .padding(paddingValues),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.SpaceAround
+    ) {
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.SpaceAround
+                .height(200.dp)
+                .padding(8.dp)
+                .drawAnimatedBorder(
+                    strokeWidth = 4.dp,
+                    durationMillis = 2000,
+                    shape = RoundedCornerShape(20.dp)
+                ),
+            shape = RoundedCornerShape(20.dp),
+        ) {
+            var magnifierCenter by remember {
+                mutableStateOf(Offset.Unspecified)
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            // Show the magnifier in the initial position
+                            onDragStart = { magnifierCenter = it },
+                            // Magnifier follows the pointer during a drag event
+                            onDrag = { _, delta ->
+                                magnifierCenter = magnifierCenter.plus(delta)
+                            },
+                            // Hide the magnifier when a user ends the drag movement.
+                            onDragEnd = { magnifierCenter = Offset.Unspecified },
+                            onDragCancel = { magnifierCenter = Offset.Unspecified },
+                        )
+                    }
+                    .magnifier(
+                        sourceCenter = {
+                            if (magnifierCenter != Offset.Unspecified) magnifierCenter - Offset(
+                                0f,
+                                200f
+                            ) else magnifierCenter
+                        },
+                        zoom = 3f,
+                        style = MagnifierStyle(
+                            size = DpSize(height = 120.dp, width = 150.dp),
+                            cornerRadius = 20.dp
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                AsyncImage(
+                    model = floorImage,
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.clip(RoundedCornerShape(20.dp))
+                )
+            }
+
+        }
+        Divider(
+            thickness = 3.dp,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(
+                5.dp
+            )
+        )
+        Text(
+            text = "Change details about ${room?.roomName} : ",
+            fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(8.dp)
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, Color.White.copy(alpha = 0.1F)),
+                        startY = 0.0f,
+                        endY = 400.0f
+                    )
+                )
         ) {
             Card(
                 modifier = Modifier
+                    .padding(16.dp)
                     .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(8.dp)
-                    .drawAnimatedBorder(
-                        strokeWidth = 4.dp,
-                        durationMillis = 2000,
-                        shape = RoundedCornerShape(20.dp)
-                    ),
-                shape = RoundedCornerShape(20.dp),
-            ) {
-                var magnifierCenter by remember {
-                    mutableStateOf(Offset.Unspecified)
-                }
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                        .pointerInput(Unit) {
-                            detectDragGestures(
-                                // Show the magnifier in the initial position
-                                onDragStart = { magnifierCenter = it },
-                                // Magnifier follows the pointer during a drag event
-                                onDrag = { _, delta ->
-                                    magnifierCenter = magnifierCenter.plus(delta)
-                                },
-                                // Hide the magnifier when a user ends the drag movement.
-                                onDragEnd = { magnifierCenter = Offset.Unspecified },
-                                onDragCancel = { magnifierCenter = Offset.Unspecified },
-                            )
-                        }
-                        .magnifier(
-                            sourceCenter = { if(magnifierCenter!= Offset.Unspecified)magnifierCenter - Offset(0f,200f) else magnifierCenter},
-                            zoom = 3f,
-                            style = MagnifierStyle(
-                                size = DpSize(height = 120.dp, width = 150.dp),
-                                cornerRadius = 20.dp
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.9f)),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 8.dp
+                )            ) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    AsyncImage(
-                        model = floorImage,
-                        contentDescription = null,
-                        contentScale = ContentScale.FillBounds,
-                        modifier = Modifier.clip(RoundedCornerShape(20.dp))
+                    Text(
+                        text = "Bed name : ",
+                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    OutlinedTextField(value = text.toString(), onValueChange = {
+                        text = it
+                    },
+                        label = { Text("Bed Name") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(15.dp),
+                        readOnly = true
                     )
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Bed availability : ",
+                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    OutlinedTextField(value = available, onValueChange = {
+                    },
+                        label = { Text("Availability") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(15.dp),
+                        readOnly = true,
+                        trailingIcon = {
+                            if(available == "Yes")
+                                Icon(imageVector = Icons.Outlined.CheckCircle, contentDescription = "check")
+                            else
+                                Icon(imageVector = Icons.Outlined.Dangerous, contentDescription = "not checked")
+                        }
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Daily rent : ",
+                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    OutlinedTextField(value = rent.toString(), onValueChange = {
+                        rent = it.toFloat()
+                    },
+                        label = { Text("Change price") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(15.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        trailingIcon = {
+                            Icon(imageVector = Icons.Outlined.AttachMoney, contentDescription = "money")
+                        }
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
 
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Reservation period : ",
+                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    OutlinedTextField(value = reservationPeriod.toString(), onValueChange = {
+                        reservationPeriod = it.toInt()
+                    },
+                        label = { Text("Change period") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(15.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        trailingIcon = {
+                            Icon(imageVector = Icons.Outlined.CalendarMonth, contentDescription = "money")
+                        }
+
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Total income : ",
+                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    OutlinedTextField(value = totalIncome.toString(), onValueChange = {
+                        totalIncome = it.toFloat()
+                    },
+                        label = { Text("Income") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(15.dp),
+                        readOnly = true,
+                        trailingIcon = {
+                            Icon(imageVector = Icons.Outlined.AttachMoney, contentDescription = "money")
+                        }
+                    )
+                }
             }
-
-            Text(
-                text = "Change details about ${room?.roomName} : ",
-                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(8.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Bed name : ",
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(8.dp)
-                )
-                OutlinedTextField(value = text.toString(), onValueChange = {
-                    text = it
-                },
-                    label = { Text("Change Name") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(15.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Bed availability : ",
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(8.dp)
-                )
-                OutlinedTextField(value = available, onValueChange = {
-                },
-                    label = { Text("Availability") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(15.dp),
-                    readOnly = true,
-                    trailingIcon = {
-                        if(available == "Yes")
-                        Icon(imageVector = Icons.Outlined.CheckCircle, contentDescription = "check")
-                        else
-                            Icon(imageVector = Icons.Outlined.Dangerous, contentDescription = "not checked")
-                    }
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Daily rent : ",
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(8.dp)
-                )
-                OutlinedTextField(value = rent.toString(), onValueChange = {
-                    rent = it.toFloat()
-                },
-                    label = { Text("Change price") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(15.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    trailingIcon = {
-                        Icon(imageVector = Icons.Outlined.AttachMoney, contentDescription = "money")
-                    }
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Reservation period : ",
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(8.dp)
-                )
-                OutlinedTextField(value = reservationPeriod.toString(), onValueChange = {
-                    reservationPeriod = it.toInt()
-                },
-                    label = { Text("Change period") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(15.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    trailingIcon = {
-                        Icon(imageVector = Icons.Outlined.CalendarMonth, contentDescription = "money")
-                    }
-
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Total income : ",
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(8.dp)
-                )
-                OutlinedTextField(value = totalIncome.toString(), onValueChange = {
-                    totalIncome = it.toFloat()
-                },
-                    label = { Text("Income") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(15.dp),
-                    readOnly = true,
-                    trailingIcon = {
-                        Icon(imageVector = Icons.Outlined.AttachMoney, contentDescription = "money")
-                    }
-                )
-            }
-
-
-
         }
-    }
 
+
+
+
+    }
 }
 
 fun Modifier.drawAnimatedBorder(

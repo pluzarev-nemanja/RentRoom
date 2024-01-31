@@ -2,6 +2,7 @@ package com.example.rentproject.data.repository
 
 import com.example.rentproject.data.data_source.RoomDao
 import com.example.rentproject.data.data_source.relations.FloorWithRooms
+import com.example.rentproject.data.data_source.relations.RoomAndPerson
 import com.example.rentproject.domain.model.Floor
 import com.example.rentproject.domain.model.Person
 import com.example.rentproject.domain.model.Room
@@ -41,6 +42,10 @@ class RoomRepositoryImpl(
 
     override suspend fun deletePerson(person: Person) {
         roomDao.deletePerson(person)
+    }
+
+    override fun getRoomAndPersonWithRoomId(roomId: Int): Flow<List<RoomAndPerson>> {
+        return roomDao.getRoomAndPersonWithRoomId(roomId)
     }
 
     override fun getFloorWithRooms(floorId: Int): Flow<List<FloorWithRooms>> {

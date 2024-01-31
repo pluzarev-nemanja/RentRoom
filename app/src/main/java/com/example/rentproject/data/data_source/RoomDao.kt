@@ -9,6 +9,7 @@ import androidx.room.Transaction
 import androidx.room.Update
 import androidx.room.Upsert
 import com.example.rentproject.data.data_source.relations.FloorWithRooms
+import com.example.rentproject.data.data_source.relations.RoomAndPerson
 import com.example.rentproject.domain.model.Floor
 import com.example.rentproject.domain.model.Person
 import com.example.rentproject.domain.model.Room
@@ -44,5 +45,9 @@ interface RoomDao {
 
     @Delete
     suspend fun deletePerson(person: Person)
+
+    @Transaction
+    @Query("SELECT * FROM room WHERE roomId = :roomId")
+    fun getRoomAndPersonWithRoomId(roomId : Int): Flow<List<RoomAndPerson>>
 
 }

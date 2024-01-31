@@ -9,5 +9,6 @@ data class RoomUseCases(
     val getFloorWithRooms: GetFloorWithRooms,
     val insertFloors: InsertFloors,
     val upsertPerson: UpsertPerson,
-    val deletePerson: DeletePerson
+    val deletePerson: DeletePerson,
+    val getRoomAndPerson: GetRoomAndPerson
 )

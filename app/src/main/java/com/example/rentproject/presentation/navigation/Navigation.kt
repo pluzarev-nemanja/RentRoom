@@ -27,6 +27,7 @@ fun Navigation(
                 secondFloor = roomsViewModel.secondFloor,
                 saveNavigatedRoom = { room->
                     roomsViewModel.saveNavigatedRoom(room)
+                    roomsViewModel.getRoomAndPerson(room!!.roomId)
                 },
                 navController = navController
             )
@@ -39,7 +40,11 @@ fun Navigation(
         composable(route = Screen.RoomDetailsScreen.route) {
             RoomDetailsScreen(
                 room = roomsViewModel.navigatedRoom.value,
-                navController = navController
+                navController = navController,
+                roomAndPerson = roomsViewModel.roomAndPerson,
+                upsertPerson = {
+                    roomsViewModel.upsertPerson(it)
+                }
             )
         }
     }
