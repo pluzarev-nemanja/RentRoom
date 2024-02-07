@@ -447,13 +447,17 @@ fun RoomCard(
                         text = "Available : $isAvailable",
                         style = MaterialTheme.typography.bodyLarge
                     )
+                    Text(
+                        text = "Reserved : ${room.reservationPeriod} days",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Monthly rent : $rent rsd",
+                            text = "Daily rent : $rent rsd",
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Button(onClick = {

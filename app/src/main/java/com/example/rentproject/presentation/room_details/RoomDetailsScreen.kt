@@ -1,6 +1,6 @@
 package com.example.rentproject.presentation.room_details
 
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -10,7 +10,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MagnifierStyle
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.magnifier
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,19 +32,14 @@ import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Dangerous
-import androidx.compose.material.icons.outlined.EmojiPeople
 import androidx.compose.material.icons.outlined.Person4
-import androidx.compose.material.icons.outlined.PersonPin
 import androidx.compose.material.icons.outlined.PersonPinCircle
-import androidx.compose.material.icons.outlined.PersonSearch
 import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,7 +48,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -82,17 +74,14 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.Lifecycle
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.rentproject.R
@@ -106,13 +95,15 @@ fun RoomDetailsScreen(
     room: Room?,
     navController: NavHostController,
     roomAndPerson: List<RoomAndPerson>,
-    upsertPerson : (Person) -> Unit
+    upsertPerson: (Person) -> Unit,
+    upsertRoom: (Room) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var person by remember {
-        if(roomAndPerson.isNotEmpty())mutableStateOf(roomAndPerson.first().person) else mutableStateOf<Person?>(null)
+        if (roomAndPerson.isNotEmpty()) mutableStateOf(roomAndPerson.first().person) else mutableStateOf<Person?>(
+            null
+        )
     }
-    val openDialog = remember { mutableStateOf(false) }
 
     var name by remember {
         mutableStateOf("")
@@ -126,7 +117,11 @@ fun RoomDetailsScreen(
     var phoneNum by remember {
         mutableIntStateOf(0)
     }
-
+    var available by remember {
+        mutableStateOf(
+            if (room?.available == true) "Yes" else "No"
+        )
+    }
 
     Scaffold(
         modifier = Modifier
@@ -139,7 +134,7 @@ fun RoomDetailsScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED){
+                        if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
                             navController.popBackStack()
                         }
                     }) {
@@ -153,312 +148,349 @@ fun RoomDetailsScreen(
             )
         }
     ) { paddingValues ->
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
         ) {
 
             BedDetails(
-                paddingValues,
-                room
+                paddingValues = paddingValues,
+                room = room,
+                available = available,
+                upsertRoom = upsertRoom
             )
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(paddingValues),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.SpaceAround
-                ) {
-                    Divider(
-                        thickness = 3.dp,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(
-                            5.dp
-                        )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(paddingValues),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.SpaceAround
+            ) {
+                Divider(
+                    thickness = 3.dp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(
+                        5.dp
                     )
-                    Text(
-                        text = "Change details about your guest : ",
-                        fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    if(person != null){
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "Guest name : ",
-                                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                                fontWeight = FontWeight.Medium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(8.dp)
-                            )
-                            OutlinedTextField(value = person?.personName.toString(), onValueChange = {
-                                //update person info
-                            },
-                                label = { Text("First name") },
-                                singleLine = true,
-                                shape = RoundedCornerShape(15.dp),
-                                trailingIcon = {
-                                    Icon(imageVector = Icons.Outlined.PersonPinCircle, contentDescription = "person")
-                                }
-                            )
-                        }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "Guest surname : ",
-                                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                                fontWeight = FontWeight.Medium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(8.dp)
-                            )
-                            OutlinedTextField(value = person?.personsLastName.toString(), onValueChange = {
-
-                            },
-                                label = { Text("Last name") },
-                                singleLine = true,
-                                shape = RoundedCornerShape(15.dp),
-                                trailingIcon = {
-                                    Icon(imageVector = Icons.Outlined.PersonPinCircle, contentDescription = "person")
-                                }
-                            )
-                        }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "Guest phone number : ",
-                                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                                fontWeight = FontWeight.Medium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(8.dp)
-                            )
-                            OutlinedTextField(value = person?.phoneNumber.toString(), onValueChange = {
-
-                            },
-                                label = { Text("Phone number") },
-                                singleLine = true,
-                                shape = RoundedCornerShape(15.dp),
-                                trailingIcon = {
-                                    Icon(imageVector = Icons.Outlined.PhoneAndroid, contentDescription = "person")
-                                }
-                            )
-                        }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "Guest Gender : ",
-                                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                                fontWeight = FontWeight.Medium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(8.dp)
-                            )
-                            OutlinedTextField(value = if(person?.gender == true)"Male" else "Female", onValueChange = {
-
-                            },
-                                label = { Text("Gender") },
-                                singleLine = true,
-                                shape = RoundedCornerShape(15.dp),
-                                trailingIcon = {
-                                    Icon(imageVector = Icons.Outlined.Person4, contentDescription = "person")
-                                }
-                            )
-                        }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            Button(onClick = { /*TODO*/ }) {
-                                Text(text = "Update Person")
-                            }
-                            Button(onClick = { /*TODO*/ }) {
-                                Text(text = "Delete Person")
-                            }
-                        }
-
-                    }else{
-                        Box(modifier = Modifier
+                )
+                Text(
+                    text = "Change details about your guest : ",
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(8.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                if (person != null) {
+                    Row(
+                        modifier = Modifier
                             .fillMaxWidth()
-                            .padding(10.dp),
-                            contentAlignment = Alignment.Center){
-
-                            Column(modifier = Modifier.fillMaxWidth(),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally) {
-                               Card {
-                                   Row(
-                                       modifier = Modifier
-                                           .fillMaxWidth()
-                                           .padding(8.dp),
-                                       verticalAlignment = Alignment.CenterVertically,
-                                       horizontalArrangement = Arrangement.SpaceBetween
-                                   ) {
-                                       Text(
-                                           text = "Guest name : ",
-                                           fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                                           fontWeight = FontWeight.Medium,
-                                           maxLines = 1,
-                                           overflow = TextOverflow.Ellipsis,
-                                           modifier = Modifier.padding(8.dp)
-                                       )
-                                       OutlinedTextField(value = name, onValueChange = {
-                                           name = it
-                                       },
-                                           label = { Text("First name") },
-                                           singleLine = true,
-                                           shape = RoundedCornerShape(15.dp),
-                                           trailingIcon = {
-                                               Icon(imageVector = Icons.Outlined.PersonPinCircle, contentDescription = "person")
-                                           }
-                                       )
-                                   }
-                                   Row(
-                                       modifier = Modifier
-                                           .fillMaxWidth()
-                                           .padding(8.dp),
-                                       verticalAlignment = Alignment.CenterVertically,
-                                       horizontalArrangement = Arrangement.SpaceBetween
-                                   ) {
-                                       Text(
-                                           text = "Guest surname : ",
-                                           fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                                           fontWeight = FontWeight.Medium,
-                                           maxLines = 1,
-                                           overflow = TextOverflow.Ellipsis,
-                                           modifier = Modifier.padding(8.dp)
-                                       )
-                                       OutlinedTextField(value = surname, onValueChange = {
-                                            surname = it
-                                       },
-                                           label = { Text("Last name") },
-                                           singleLine = true,
-                                           shape = RoundedCornerShape(15.dp),
-                                           trailingIcon = {
-                                               Icon(imageVector = Icons.Outlined.PersonPinCircle, contentDescription = "person")
-                                           }
-                                       )
-                                   }
-                                   Row(
-                                       modifier = Modifier
-                                           .fillMaxWidth()
-                                           .padding(8.dp),
-                                       verticalAlignment = Alignment.CenterVertically,
-                                       horizontalArrangement = Arrangement.SpaceBetween
-                                   ) {
-                                       Text(
-                                           text = "Guest phone number : ",
-                                           fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                                           fontWeight = FontWeight.Medium,
-                                           maxLines = 1,
-                                           overflow = TextOverflow.Ellipsis,
-                                           modifier = Modifier.padding(8.dp)
-                                       )
-                                       OutlinedTextField(value = phoneNum.toString(), onValueChange = {
-                                            phoneNum = it.toInt()
-                                       },
-                                           label = { Text("Phone number") },
-                                           singleLine = true,
-                                           shape = RoundedCornerShape(15.dp),
-                                           keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                           trailingIcon = {
-                                               Icon(imageVector = Icons.Outlined.PhoneAndroid, contentDescription = "person")
-                                           }
-                                       )
-                                   }
-                                   Row(
-                                       modifier = Modifier
-                                           .fillMaxWidth()
-                                           .padding(8.dp),
-                                       verticalAlignment = Alignment.CenterVertically,
-                                       horizontalArrangement = Arrangement.SpaceBetween
-                                   ) {
-                                       Text(
-                                           text = "Guest Gender : ",
-                                           fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                                           fontWeight = FontWeight.Medium,
-                                           maxLines = 1,
-                                           overflow = TextOverflow.Ellipsis,
-                                           modifier = Modifier.padding(8.dp)
-                                       )
-                                       OutlinedTextField(value = if(gender)"Male" else "Female", onValueChange = {
-                                            gender = it.toBoolean()
-                                       },
-                                           label = { Text("Gender") },
-                                           singleLine = true,
-                                           shape = RoundedCornerShape(15.dp),
-                                           trailingIcon = {
-                                               Icon(imageVector = Icons.Outlined.Person4, contentDescription = "person")
-                                           }
-                                       )
-                                   }
-                               }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                OutlinedButton(onClick = {
-                                    person = Person(
-                                        personId = 0,
-                                        personName = name,
-                                        personsLastName = surname,
-                                        phoneNumber = phoneNum,
-                                        gender = gender,
-                                        roomId = room!!.roomId
-                                    )
-                                    upsertPerson.invoke(person!!)
-                                }) {
-                                    Text(text = "Add guest")
-                                }
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Guest name : ",
+                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                        OutlinedTextField(value = person?.personName.toString(), onValueChange = {
+                            //update person info
+                        },
+                            label = { Text("First name") },
+                            singleLine = true,
+                            shape = RoundedCornerShape(15.dp),
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.PersonPinCircle,
+                                    contentDescription = "person"
+                                )
                             }
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Guest surname : ",
+                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                        OutlinedTextField(value = person?.personsLastName.toString(),
+                            onValueChange = {
 
+                            },
+                            label = { Text("Last name") },
+                            singleLine = true,
+                            shape = RoundedCornerShape(15.dp),
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.PersonPinCircle,
+                                    contentDescription = "person"
+                                )
+                            }
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Guest phone number : ",
+                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                        OutlinedTextField(value = person?.phoneNumber.toString(), onValueChange = {
+
+                        },
+                            label = { Text("Phone number") },
+                            singleLine = true,
+                            shape = RoundedCornerShape(15.dp),
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.PhoneAndroid,
+                                    contentDescription = "person"
+                                )
+                            }
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Guest Gender : ",
+                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                        OutlinedTextField(value = if (person?.gender == true) "Male" else "Female",
+                            onValueChange = {
+
+                            },
+                            label = { Text("Gender") },
+                            singleLine = true,
+                            shape = RoundedCornerShape(15.dp),
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.Person4,
+                                    contentDescription = "person"
+                                )
+                            }
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Button(onClick = { /*TODO*/ }) {
+                            Text(text = "Update Person")
+                        }
+                        Button(onClick = { /*TODO*/ }) {
+                            Text(text = "Delete Person")
                         }
                     }
 
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Card {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "Guest name : ",
+                                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                                        fontWeight = FontWeight.Medium,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.padding(8.dp)
+                                    )
+                                    OutlinedTextField(value = name, onValueChange = {
+                                        name = it
+                                    },
+                                        label = { Text("First name") },
+                                        singleLine = true,
+                                        shape = RoundedCornerShape(15.dp),
+                                        trailingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Outlined.PersonPinCircle,
+                                                contentDescription = "person"
+                                            )
+                                        }
+                                    )
+                                }
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "Guest surname : ",
+                                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                                        fontWeight = FontWeight.Medium,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.padding(8.dp)
+                                    )
+                                    OutlinedTextField(value = surname, onValueChange = {
+                                        surname = it
+                                    },
+                                        label = { Text("Last name") },
+                                        singleLine = true,
+                                        shape = RoundedCornerShape(15.dp),
+                                        trailingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Outlined.PersonPinCircle,
+                                                contentDescription = "person"
+                                            )
+                                        }
+                                    )
+                                }
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "Guest phone number : ",
+                                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                                        fontWeight = FontWeight.Medium,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.padding(8.dp)
+                                    )
+                                    OutlinedTextField(value = phoneNum.toString(), onValueChange = {
+                                        phoneNum = it.toInt()
+                                    },
+                                        label = { Text("Phone number") },
+                                        singleLine = true,
+                                        shape = RoundedCornerShape(15.dp),
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                        trailingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Outlined.PhoneAndroid,
+                                                contentDescription = "person"
+                                            )
+                                        }
+                                    )
+                                }
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "Guest Gender : ",
+                                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                                        fontWeight = FontWeight.Medium,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.padding(8.dp)
+                                    )
+                                    OutlinedTextField(value = if (gender) "Male" else "Female",
+                                        onValueChange = {
+                                            gender = it.toBoolean()
+                                        },
+                                        label = { Text("Gender") },
+                                        singleLine = true,
+                                        shape = RoundedCornerShape(15.dp),
+                                        trailingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Outlined.Person4,
+                                                contentDescription = "person"
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedButton(onClick = {
+                                person = Person(
+                                    personId = 0,
+                                    personName = name,
+                                    personsLastName = surname,
+                                    phoneNumber = phoneNum,
+                                    gender = gender,
+                                    roomId = room!!.roomId
+                                )
+                                upsertPerson.invoke(person!!)
+                                upsertRoom.invoke(
+                                    room.copy(
+                                        available = false
+                                    )
+                                )
+                                available = "No"
+                            }) {
+                                Text(text = "Add guest")
+                            }
+                        }
+
+                    }
                 }
+
+            }
         }
     }
-    }
+}
 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BedDetails(
     paddingValues: PaddingValues,
-    room: Room?
+    room: Room?,
+    available: String,
+    upsertRoom: (Room) -> Unit
 ) {
     var text by remember { mutableStateOf(room?.roomName) }
-    val available by remember{
-        mutableStateOf(
-            if(room?.available == true) "Yes" else "No"
-        )
-    }
     val floorImage by remember {
         when (room?.floorId) {
             0 -> mutableIntStateOf(R.drawable.dole)
@@ -474,8 +506,11 @@ fun BedDetails(
         mutableStateOf(room?.reservationPeriod)
     }
     var totalIncome by remember {
-        mutableStateOf(room?.totalIncome)
+        mutableStateOf(
+            room?.totalIncome
+        )
     }
+    val localContext = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -571,7 +606,8 @@ fun BedDetails(
                     .background(MaterialTheme.colorScheme.background.copy(alpha = 0.9f)),
                 elevation = CardDefaults.cardElevation(
                     defaultElevation = 8.dp
-                )            ) {
+                )
+            ) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     modifier = Modifier
@@ -588,9 +624,10 @@ fun BedDetails(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(8.dp)
                     )
-                    OutlinedTextField(value = text.toString(), onValueChange = {
-                        text = it
-                    },
+                    OutlinedTextField(
+                        value = text.toString(), onValueChange = {
+                            text = it
+                        },
                         label = { Text("Bed Name") },
                         singleLine = true,
                         shape = RoundedCornerShape(15.dp),
@@ -620,10 +657,16 @@ fun BedDetails(
                         shape = RoundedCornerShape(15.dp),
                         readOnly = true,
                         trailingIcon = {
-                            if(available == "Yes")
-                                Icon(imageVector = Icons.Outlined.CheckCircle, contentDescription = "check")
+                            if (available == "Yes")
+                                Icon(
+                                    imageVector = Icons.Outlined.CheckCircle,
+                                    contentDescription = "check"
+                                )
                             else
-                                Icon(imageVector = Icons.Outlined.Dangerous, contentDescription = "not checked")
+                                Icon(
+                                    imageVector = Icons.Outlined.Dangerous,
+                                    contentDescription = "not checked"
+                                )
                         }
                     )
                 }
@@ -644,6 +687,7 @@ fun BedDetails(
                         modifier = Modifier.padding(8.dp)
                     )
                     OutlinedTextField(value = rent.toString(), onValueChange = {
+                        if(it.isNotEmpty())
                         rent = it.toFloat()
                     },
                         label = { Text("Change price") },
@@ -651,7 +695,10 @@ fun BedDetails(
                         shape = RoundedCornerShape(15.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         trailingIcon = {
-                            Icon(imageVector = Icons.Outlined.AttachMoney, contentDescription = "money")
+                            Icon(
+                                imageVector = Icons.Outlined.AttachMoney,
+                                contentDescription = "money"
+                            )
                         }
                     )
                 }
@@ -672,15 +719,22 @@ fun BedDetails(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(8.dp)
                     )
-                    OutlinedTextField(value = reservationPeriod.toString(), onValueChange = {
-                        reservationPeriod = it.toInt()
+                    OutlinedTextField(value = reservationPeriod.toString(), onValueChange = { day->
+                        if(day.isNotEmpty())
+                        reservationPeriod = day.toInt()
                     },
                         label = { Text("Change period") },
                         singleLine = true,
                         shape = RoundedCornerShape(15.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         trailingIcon = {
-                            Icon(imageVector = Icons.Outlined.CalendarMonth, contentDescription = "money")
+                            Icon(
+                                imageVector = Icons.Outlined.CalendarMonth,
+                                contentDescription = "money"
+                            )
+                        },
+                        suffix = {
+                            Text(text = " days")
                         }
 
                     )
@@ -701,34 +755,49 @@ fun BedDetails(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(8.dp)
                     )
-                    OutlinedTextField(value = totalIncome.toString(), onValueChange = {
-                        totalIncome = it.toFloat()
+                    OutlinedTextField(value = if (reservationPeriod != 0) {
+                        (reservationPeriod?.let { rent?.div(it.toFloat()) }).toString()
+                    } else "0", onValueChange = {
+                        totalIncome =if (reservationPeriod != 0) {
+                            (reservationPeriod?.let { rent?.div(it.toFloat()) })
+                        } else 0F
                     },
                         label = { Text("Income") },
                         singleLine = true,
                         shape = RoundedCornerShape(15.dp),
                         readOnly = true,
                         trailingIcon = {
-                            Icon(imageVector = Icons.Outlined.AttachMoney, contentDescription = "money")
+                            Icon(
+                                imageVector = Icons.Outlined.AttachMoney,
+                                contentDescription = "money"
+                            )
                         }
                     )
                 }
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End) {
+                    horizontalArrangement = Arrangement.End
+                ) {
                     Button(onClick = {
                         //update function for bed data
-
+                        upsertRoom.invoke(
+                            room!!.copy(
+                                available = available == "Yes",
+                                rent = rent!!,
+                                reservationPeriod = reservationPeriod!!,
+                                totalIncome = totalIncome!!
+                            )
+                        )
+                        Toast.makeText(localContext,"Bed details updated!",Toast.LENGTH_LONG).show()
                     }) {
                         Text(text = "Update changes")
                     }
                 }
             }
         }
-
-
 
 
     }

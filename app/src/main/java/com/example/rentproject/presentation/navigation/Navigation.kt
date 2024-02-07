@@ -44,6 +44,9 @@ fun Navigation(
                 roomAndPerson = roomsViewModel.roomAndPerson,
                 upsertPerson = {
                     roomsViewModel.upsertPerson(it)
+                },
+                upsertRoom = {
+                    roomsViewModel.upsertRoom(it)
                 }
             )
         }
