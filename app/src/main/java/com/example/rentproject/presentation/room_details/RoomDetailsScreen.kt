@@ -1,5 +1,6 @@
 package com.example.rentproject.presentation.room_details
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -96,7 +97,8 @@ fun RoomDetailsScreen(
     navController: NavHostController,
     roomAndPerson: List<RoomAndPerson>,
     upsertPerson: (Person) -> Unit,
-    upsertRoom: (Room) -> Unit
+    upsertRoom: (Room) -> Unit,
+    deletePerson: (Person) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var person by remember {
@@ -104,7 +106,6 @@ fun RoomDetailsScreen(
             null
         )
     }
-
     var name by remember {
         mutableStateOf("")
     }
@@ -122,6 +123,21 @@ fun RoomDetailsScreen(
             if (room?.available == true) "Yes" else "No"
         )
     }
+    var personName by remember {
+        mutableStateOf(person?.personName)
+    }
+    var personSurname by remember {
+        mutableStateOf(person?.personsLastName)
+    }
+    var personGender by remember {
+        mutableStateOf(person?.gender)
+    }
+    var phone by remember {
+        mutableStateOf(person?.phoneNumber)
+    }
+
+    val localContext = LocalContext.current
+
 
     Scaffold(
         modifier = Modifier
@@ -158,7 +174,8 @@ fun RoomDetailsScreen(
                 paddingValues = paddingValues,
                 room = room,
                 available = available,
-                upsertRoom = upsertRoom
+                upsertRoom = upsertRoom,
+                localContext = localContext
             )
 
             Column(
@@ -200,8 +217,8 @@ fun RoomDetailsScreen(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(8.dp)
                         )
-                        OutlinedTextField(value = person?.personName.toString(), onValueChange = {
-                            //update person info
+                        OutlinedTextField(value = personName!!, onValueChange = {
+                           personName = it
                         },
                             label = { Text("First name") },
                             singleLine = true,
@@ -229,9 +246,9 @@ fun RoomDetailsScreen(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(8.dp)
                         )
-                        OutlinedTextField(value = person?.personsLastName.toString(),
+                        OutlinedTextField(value = personSurname!!,
                             onValueChange = {
-
+                                personSurname = it
                             },
                             label = { Text("Last name") },
                             singleLine = true,
@@ -259,12 +276,14 @@ fun RoomDetailsScreen(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(8.dp)
                         )
-                        OutlinedTextField(value = person?.phoneNumber.toString(), onValueChange = {
-
+                        OutlinedTextField(value = phone.toString(), onValueChange = {
+                            if(it.isNotEmpty())
+                            phone = it.toInt()
                         },
                             label = { Text("Phone number") },
                             singleLine = true,
                             shape = RoundedCornerShape(15.dp),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             trailingIcon = {
                                 Icon(
                                     imageVector = Icons.Outlined.PhoneAndroid,
@@ -288,9 +307,9 @@ fun RoomDetailsScreen(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(8.dp)
                         )
-                        OutlinedTextField(value = if (person?.gender == true) "Male" else "Female",
+                        OutlinedTextField(value = if (personGender == true) "Male" else "Female",
                             onValueChange = {
-
+                                personGender = it.toBoolean()
                             },
                             label = { Text("Gender") },
                             singleLine = true,
@@ -310,10 +329,30 @@ fun RoomDetailsScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Button(onClick = { /*TODO*/ }) {
+                        Button(onClick = {
+                            upsertPerson.invoke(
+                                    person!!.copy(
+                                    personName = personName!!,
+                                    personsLastName = personSurname!!,
+                                    phoneNumber = phone!!,
+                                    gender = personGender!!
+                                )
+                            )
+                            Toast.makeText(localContext,"Persons data updated!",Toast.LENGTH_LONG).show()
+                        }) {
                             Text(text = "Update Person")
                         }
-                        Button(onClick = { /*TODO*/ }) {
+                        Button(onClick = {
+                            deletePerson.invoke(person!!)
+                            person = null
+                            available = "Yes"
+                            upsertRoom.invoke(
+                                room!!.copy(
+                                    available = true,
+                                )
+                            )
+                            Toast.makeText(localContext,"Person deleted!",Toast.LENGTH_LONG).show()
+                        }) {
                             Text(text = "Delete Person")
                         }
                     }
@@ -488,7 +527,8 @@ fun BedDetails(
     paddingValues: PaddingValues,
     room: Room?,
     available: String,
-    upsertRoom: (Room) -> Unit
+    upsertRoom: (Room) -> Unit,
+    localContext : Context
 ) {
     var text by remember { mutableStateOf(room?.roomName) }
     val floorImage by remember {
@@ -510,7 +550,6 @@ fun BedDetails(
             room?.totalIncome
         )
     }
-    val localContext = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
