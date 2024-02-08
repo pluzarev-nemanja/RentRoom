@@ -33,14 +33,13 @@ import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
@@ -48,7 +47,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
@@ -65,6 +63,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
@@ -73,7 +72,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
@@ -141,7 +139,7 @@ fun HomeScreen(
 
     AnimatedDrawer(
         drawerContent = {
-            ModalDrawerSheet{
+            ModalDrawerSheet {
                 Spacer(modifier = Modifier.height(16.dp))
                 items.forEachIndexed { index, item ->
                     NavigationDrawerItem(
@@ -298,7 +296,7 @@ fun FloorPage(
     roomsList: List<Room>,
     navController: NavController,
     saveNavigatedRoom: (Room?) -> Unit,
-    floorImage : Int
+    floorImage: Int
 
 ) {
     Column(
@@ -331,12 +329,18 @@ fun FloorPage(
                         )
                     }
                     .magnifier(
-                        sourceCenter = { if(magnifierCenter!= Offset.Unspecified)magnifierCenter - Offset(0f,200f) else magnifierCenter},
+                        sourceCenter = {
+                            if (magnifierCenter != Offset.Unspecified) magnifierCenter - Offset(
+                                0f,
+                                200f
+                            ) else magnifierCenter
+                        },
                         zoom = 3f,
                         style = MagnifierStyle(
                             size = DpSize(height = 120.dp, width = 150.dp),
                             cornerRadius = 20.dp
-                        )),
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
@@ -392,6 +396,10 @@ fun RoomCard(
     val isAvailable by remember {
         mutableStateOf(if (available) "Yes" else "No")
     }
+    val color by remember {
+        if (available) mutableStateOf(Color(0xFF74E291))
+        else mutableStateOf(Color(0xFFFF004D))
+    }
 
     Card(
         modifier = Modifier
@@ -402,6 +410,9 @@ fun RoomCard(
                     easing = LinearOutSlowInEasing
                 )
             ),
+        colors = CardDefaults.cardColors(
+            containerColor = color.copy(alpha = 0.4f),
+        ),
         shape = shape,
         onClick = {
             expandedState = !expandedState
@@ -472,6 +483,7 @@ fun RoomCard(
         }
     }
 }
+
 @Stable
 interface AnimatedDrawerState {
     var density: Float
@@ -651,12 +663,12 @@ fun AnimatedDrawer(
             Constraints.fixed(
                 width = constraints.maxWidth,
                 height = constraints.maxHeight,
-           )
+            )
         )
         layout(
             width = constraints.maxWidth,
             height = constraints.maxHeight,
-       ) {
+        ) {
             backgroundPlaceable.placeRelativeWithLayer(
                 IntOffset.Zero
             ) {
@@ -679,5 +691,5 @@ fun AnimatedDrawer(
             }
         }
 
-}
+    }
 }

@@ -218,7 +218,7 @@ fun RoomDetailsScreen(
                             modifier = Modifier.padding(8.dp)
                         )
                         OutlinedTextField(value = personName!!, onValueChange = {
-                           personName = it
+                            personName = it
                         },
                             label = { Text("First name") },
                             singleLine = true,
@@ -277,8 +277,8 @@ fun RoomDetailsScreen(
                             modifier = Modifier.padding(8.dp)
                         )
                         OutlinedTextField(value = phone.toString(), onValueChange = {
-                            if(it.isNotEmpty())
-                            phone = it.toInt()
+                            if (it.isNotEmpty())
+                                phone = it.toInt()
                         },
                             label = { Text("Phone number") },
                             singleLine = true,
@@ -331,14 +331,15 @@ fun RoomDetailsScreen(
                     ) {
                         Button(onClick = {
                             upsertPerson.invoke(
-                                    person!!.copy(
+                                person!!.copy(
                                     personName = personName!!,
                                     personsLastName = personSurname!!,
                                     phoneNumber = phone!!,
                                     gender = personGender!!
                                 )
                             )
-                            Toast.makeText(localContext,"Persons data updated!",Toast.LENGTH_LONG).show()
+                            Toast.makeText(localContext, "Persons data updated!", Toast.LENGTH_LONG)
+                                .show()
                         }) {
                             Text(text = "Update Person")
                         }
@@ -351,7 +352,8 @@ fun RoomDetailsScreen(
                                     available = true,
                                 )
                             )
-                            Toast.makeText(localContext,"Person deleted!",Toast.LENGTH_LONG).show()
+                            Toast.makeText(localContext, "Person deleted!", Toast.LENGTH_LONG)
+                                .show()
                         }) {
                             Text(text = "Delete Person")
                         }
@@ -492,20 +494,24 @@ fun RoomDetailsScreen(
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             OutlinedButton(onClick = {
-                                person = Person(
-                                    personId = 0,
-                                    personName = name,
-                                    personsLastName = surname,
-                                    phoneNumber = phoneNum,
-                                    gender = gender,
-                                    roomId = room!!.roomId
-                                )
-                                upsertPerson.invoke(person!!)
-                                upsertRoom.invoke(
-                                    room.copy(
-                                        available = false
+                                if (room != null) {
+                                    upsertPerson.invoke(
+                                        Person(
+                                            personId = 0,
+                                            personName = name,
+                                            personsLastName = surname,
+                                            phoneNumber = phoneNum,
+                                            gender = gender,
+                                            roomId = room.roomId
+                                        )
                                     )
-                                )
+                                    upsertRoom.invoke(
+                                        room.copy(
+                                            available = false
+                                        )
+                                    )
+                                }
+
                                 available = "No"
                             }) {
                                 Text(text = "Add guest")
@@ -528,7 +534,7 @@ fun BedDetails(
     room: Room?,
     available: String,
     upsertRoom: (Room) -> Unit,
-    localContext : Context
+    localContext: Context
 ) {
     var text by remember { mutableStateOf(room?.roomName) }
     val floorImage by remember {
@@ -726,8 +732,8 @@ fun BedDetails(
                         modifier = Modifier.padding(8.dp)
                     )
                     OutlinedTextField(value = rent.toString(), onValueChange = {
-                        if(it.isNotEmpty())
-                        rent = it.toFloat()
+                        if (it.isNotEmpty())
+                            rent = it.toFloat()
                     },
                         label = { Text("Change price") },
                         singleLine = true,
@@ -758,9 +764,9 @@ fun BedDetails(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(8.dp)
                     )
-                    OutlinedTextField(value = reservationPeriod.toString(), onValueChange = { day->
-                        if(day.isNotEmpty())
-                        reservationPeriod = day.toInt()
+                    OutlinedTextField(value = reservationPeriod.toString(), onValueChange = { day ->
+                        if (day.isNotEmpty())
+                            reservationPeriod = day.toInt()
                     },
                         label = { Text("Change period") },
                         singleLine = true,
@@ -797,7 +803,7 @@ fun BedDetails(
                     OutlinedTextField(value = if (reservationPeriod != 0) {
                         (reservationPeriod?.let { rent?.div(it.toFloat()) }).toString()
                     } else "0", onValueChange = {
-                        totalIncome =if (reservationPeriod != 0) {
+                        totalIncome = if (reservationPeriod != 0) {
                             (reservationPeriod?.let { rent?.div(it.toFloat()) })
                         } else 0F
                     },
@@ -830,7 +836,8 @@ fun BedDetails(
                                 totalIncome = totalIncome!!
                             )
                         )
-                        Toast.makeText(localContext,"Bed details updated!",Toast.LENGTH_LONG).show()
+                        Toast.makeText(localContext, "Bed details updated!", Toast.LENGTH_LONG)
+                            .show()
                     }) {
                         Text(text = "Update changes")
                     }
