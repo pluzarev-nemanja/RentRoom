@@ -66,7 +66,9 @@ fun Navigation(
             popExitTransition = {
                 scaleOutOfContainer()
             }) {
-            SettingsScreen()
+            SettingsScreen(
+                navController = navController
+            )
         }
 
         composable(
