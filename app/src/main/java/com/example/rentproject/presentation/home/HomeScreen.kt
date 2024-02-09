@@ -91,6 +91,7 @@ import com.example.rentproject.presentation.util.Screen
 import com.example.rentproject.presentation.util.SettingsItems
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import java.util.Currency
 import kotlin.math.PI
 import kotlin.math.sin
 
@@ -102,8 +103,12 @@ fun HomeScreen(
     secondFloor: List<FloorWithRooms>,
     navController: NavController,
     saveNavigatedRoom: (Room?) -> Unit,
+    currency: Boolean
 ) {
 
+    val curr by remember {
+        mutableStateOf(currency)
+    }
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { RoomTabs.entries.size })
@@ -279,7 +284,8 @@ fun HomeScreen(
                             roomsList = if (floor.isNotEmpty()) floor.first().rooms else emptyList(),
                             navController = navController,
                             saveNavigatedRoom = saveNavigatedRoom,
-                            floorImage = floorImage
+                            floorImage = floorImage,
+                            currency = curr
                         )
                     }
                 }
@@ -296,7 +302,8 @@ fun FloorPage(
     roomsList: List<Room>,
     navController: NavController,
     saveNavigatedRoom: (Room?) -> Unit,
-    floorImage: Int
+    floorImage: Int,
+    currency : Boolean
 
 ) {
     Column(
@@ -366,7 +373,8 @@ fun FloorPage(
                         rent = room.rent,
                         navController = navController,
                         room = room,
-                        saveNavigatedRoom = saveNavigatedRoom
+                        saveNavigatedRoom = saveNavigatedRoom,
+                        currency = currency
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -387,7 +395,8 @@ fun RoomCard(
     rent: Float,
     navController: NavController,
     saveNavigatedRoom: (Room?) -> Unit,
-    room: Room
+    room: Room,
+    currency: Boolean
 ) {
     var expandedState by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(
@@ -400,7 +409,9 @@ fun RoomCard(
         if (available) mutableStateOf(Color(0xFF74E291))
         else mutableStateOf(Color(0xFFFF004D))
     }
-
+    val curr by remember {
+        if(!currency) mutableStateOf("Euro") else mutableStateOf("Rsd")
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -468,7 +479,7 @@ fun RoomCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Daily rent : $rent rsd",
+                            text = "Daily rent : $rent $curr",
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Button(onClick = {

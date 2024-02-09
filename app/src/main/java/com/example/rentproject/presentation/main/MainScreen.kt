@@ -12,7 +12,9 @@ import com.example.rentproject.presentation.rooms.RoomsViewModel
 @Composable
 fun MainScreen(
     darkTheme: Boolean,
-    onThemeUpdated : () -> Unit
+    onThemeUpdated : () -> Unit,
+    currency : Boolean,
+    changeCurrency : () -> Unit
 ) {
 
     val navController = rememberNavController()
@@ -23,7 +25,9 @@ fun MainScreen(
         Navigation(
             navController = navController,
             darkTheme = darkTheme,
-            onThemeUpdated = onThemeUpdated
+            onThemeUpdated = onThemeUpdated,
+            currency = currency,
+            changeCurrency = changeCurrency
         )
     }
 

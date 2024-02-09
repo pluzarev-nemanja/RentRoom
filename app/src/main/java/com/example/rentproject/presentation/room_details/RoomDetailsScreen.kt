@@ -89,6 +89,7 @@ import com.example.rentproject.R
 import com.example.rentproject.data.data_source.relations.RoomAndPerson
 import com.example.rentproject.domain.model.Person
 import com.example.rentproject.domain.model.Room
+import java.util.Currency
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -98,7 +99,8 @@ fun RoomDetailsScreen(
     roomAndPerson: List<RoomAndPerson>,
     upsertPerson: (Person) -> Unit,
     upsertRoom: (Room) -> Unit,
-    deletePerson: (Person) -> Unit
+    deletePerson: (Person) -> Unit,
+    currency: Boolean
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var person by remember {
@@ -175,7 +177,8 @@ fun RoomDetailsScreen(
                 room = room,
                 available = available,
                 upsertRoom = upsertRoom,
-                localContext = localContext
+                localContext = localContext,
+                currency = currency
             )
 
             Column(
@@ -534,7 +537,8 @@ fun BedDetails(
     room: Room?,
     available: String,
     upsertRoom: (Room) -> Unit,
-    localContext: Context
+    localContext: Context,
+    currency: Boolean
 ) {
     var text by remember { mutableStateOf(room?.roomName) }
     val floorImage by remember {
@@ -555,6 +559,9 @@ fun BedDetails(
         mutableStateOf(
             room?.totalIncome
         )
+    }
+    val curr by remember {
+        if(!currency) mutableStateOf("Euro") else mutableStateOf("Rsd")
     }
     Column(
         modifier = Modifier
@@ -744,6 +751,9 @@ fun BedDetails(
                                 imageVector = Icons.Outlined.AttachMoney,
                                 contentDescription = "money"
                             )
+                        },
+                        suffix = {
+                            Text(text = curr)
                         }
                     )
                 }
@@ -816,6 +826,9 @@ fun BedDetails(
                                 imageVector = Icons.Outlined.AttachMoney,
                                 contentDescription = "money"
                             )
+                        },
+                        suffix = {
+                            Text(text = curr)
                         }
                     )
                 }

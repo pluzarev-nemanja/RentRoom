@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
             val settingsViewModel by viewModels<SettingsViewModel>()
             val settings = settingsViewModel.settings
             var darkTheme = settings.darkMode
+            var currency = settings.currency
             RentProjectTheme(darkTheme = darkTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -43,6 +44,15 @@ class MainActivity : ComponentActivity() {
                             settingsViewModel.upsertSettings(
                                 settings.copy(
                                     darkMode = darkTheme
+                                )
+                            )
+                        },
+                        currency = currency,
+                        changeCurrency = {
+                            currency = !currency
+                            settingsViewModel.upsertSettings(
+                                settings.copy(
+                                    currency = currency
                                 )
                             )
                         }

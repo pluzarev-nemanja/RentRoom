@@ -82,13 +82,15 @@ import java.util.Currency
 fun SettingsScreen(
     navController : NavController,
     darkTheme: Boolean,
-    onThemeUpdated : () -> Unit
+    onThemeUpdated : () -> Unit,
+    currency : Boolean,
+    changeCurrency : () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     val scope = rememberCoroutineScope()
-    var currency by remember {
-        mutableStateOf(false)
+    var curr by remember {
+        mutableStateOf(currency)
     }
 
     val items = listOf(
@@ -209,9 +211,10 @@ fun SettingsScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 CurrencyPicker(
-                    currency = currency,
+                    currency = curr,
                     onClick = {
-                        currency = !currency
+                        curr = !currency
+                        changeCurrency.invoke()
                     },
                     size = 50.dp
                 )

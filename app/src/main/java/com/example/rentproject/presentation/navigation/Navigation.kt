@@ -25,7 +25,8 @@ fun Navigation(
     roomsViewModel: RoomsViewModel = hiltViewModel(),
     darkTheme: Boolean,
     onThemeUpdated : () -> Unit,
-    settingsViewModel: SettingsViewModel = hiltViewModel()
+    currency : Boolean,
+    changeCurrency : () -> Unit
 ) {
 
     NavHost(navController = navController, startDestination = Screen.HomeScreen.route) {
@@ -52,7 +53,8 @@ fun Navigation(
                     roomsViewModel.saveNavigatedRoom(room)
                     roomsViewModel.getRoomAndPerson(room!!.roomId)
                 },
-                navController = navController
+                navController = navController,
+                currency = currency
             )
         }
 
@@ -73,7 +75,9 @@ fun Navigation(
             SettingsScreen(
                 navController = navController,
                 darkTheme,
-                onThemeUpdated
+                onThemeUpdated,
+                currency = currency,
+                changeCurrency = changeCurrency
             )
         }
 
@@ -104,7 +108,8 @@ fun Navigation(
                 },
                 deletePerson = {
                     roomsViewModel.deletePerson(it)
-                }
+                },
+                currency = currency
             )
         }
     }
