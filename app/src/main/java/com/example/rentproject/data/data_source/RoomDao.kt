@@ -13,6 +13,7 @@ import com.example.rentproject.data.data_source.relations.RoomAndPerson
 import com.example.rentproject.domain.model.Floor
 import com.example.rentproject.domain.model.Person
 import com.example.rentproject.domain.model.Room
+import com.example.rentproject.domain.model.Settings
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -49,5 +50,11 @@ interface RoomDao {
     @Transaction
     @Query("SELECT * FROM room WHERE roomId = :roomId")
     fun getRoomAndPersonWithRoomId(roomId : Int): Flow<List<RoomAndPerson>>
+
+    @Upsert
+    suspend fun upsertSettings(settings: Settings)
+
+    @Query("SELECT * FROM Settings WHERE id = :id")
+    fun getSettings(id: Int): Flow<Settings>
 
 }

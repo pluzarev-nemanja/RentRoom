@@ -10,7 +10,10 @@ import com.example.rentproject.presentation.navigation.Navigation
 import com.example.rentproject.presentation.rooms.RoomsViewModel
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    darkTheme: Boolean,
+    onThemeUpdated : () -> Unit
+) {
 
     val navController = rememberNavController()
 
@@ -19,6 +22,8 @@ fun MainScreen() {
     ) {
         Navigation(
             navController = navController,
+            darkTheme = darkTheme,
+            onThemeUpdated = onThemeUpdated
         )
     }
 

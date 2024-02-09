@@ -11,11 +11,13 @@ import com.example.rentproject.domain.use_case.GetFloorWithRooms
 import com.example.rentproject.domain.use_case.GetRoomAndPerson
 import com.example.rentproject.domain.use_case.GetRoomById
 import com.example.rentproject.domain.use_case.GetRooms
+import com.example.rentproject.domain.use_case.GetSettingsById
 import com.example.rentproject.domain.use_case.InsertFloors
 import com.example.rentproject.domain.use_case.InsertRooms
 import com.example.rentproject.domain.use_case.RoomUseCases
 import com.example.rentproject.domain.use_case.UpsertPerson
 import com.example.rentproject.domain.use_case.UpsertRoom
+import com.example.rentproject.domain.use_case.UpsertSettings
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -57,7 +59,9 @@ object AppModule {
             insertFloors = InsertFloors(repository),
             upsertPerson = UpsertPerson(repository),
             deletePerson = DeletePerson(repository),
-            getRoomAndPerson = GetRoomAndPerson(repository)
+            getRoomAndPerson = GetRoomAndPerson(repository),
+            upsertSettings = UpsertSettings(repository),
+            getSettingsById = GetSettingsById(repository)
         )
     }
 

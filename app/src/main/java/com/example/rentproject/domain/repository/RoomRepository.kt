@@ -5,6 +5,7 @@ import com.example.rentproject.data.data_source.relations.RoomAndPerson
 import com.example.rentproject.domain.model.Floor
 import com.example.rentproject.domain.model.Person
 import com.example.rentproject.domain.model.Room
+import com.example.rentproject.domain.model.Settings
 import kotlinx.coroutines.flow.Flow
 
 interface RoomRepository {
@@ -22,5 +23,7 @@ interface RoomRepository {
 
     suspend fun deletePerson(person: Person)
     fun getRoomAndPersonWithRoomId(roomId : Int): Flow<List<RoomAndPerson>>
+    suspend fun upsertSettings(settings: Settings)
+    fun getSettings(id: Int): Flow<Settings>
 
 }

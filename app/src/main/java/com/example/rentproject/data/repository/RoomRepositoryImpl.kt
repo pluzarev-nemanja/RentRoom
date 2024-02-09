@@ -6,6 +6,7 @@ import com.example.rentproject.data.data_source.relations.RoomAndPerson
 import com.example.rentproject.domain.model.Floor
 import com.example.rentproject.domain.model.Person
 import com.example.rentproject.domain.model.Room
+import com.example.rentproject.domain.model.Settings
 import com.example.rentproject.domain.repository.RoomRepository
 import kotlinx.coroutines.flow.Flow
 
@@ -46,6 +47,14 @@ class RoomRepositoryImpl(
 
     override fun getRoomAndPersonWithRoomId(roomId: Int): Flow<List<RoomAndPerson>> {
         return roomDao.getRoomAndPersonWithRoomId(roomId)
+    }
+
+    override suspend fun upsertSettings(settings: Settings) {
+        roomDao.upsertSettings(settings)
+    }
+
+    override fun getSettings(id: Int): Flow<Settings> {
+        return roomDao.getSettings(id)
     }
 
     override fun getFloorWithRooms(floorId: Int): Flow<List<FloorWithRooms>> {

@@ -13,6 +13,7 @@ import com.example.rentproject.presentation.home.HomeScreen
 import com.example.rentproject.presentation.room_details.RoomDetailsScreen
 import com.example.rentproject.presentation.rooms.RoomsViewModel
 import com.example.rentproject.presentation.settings.SettingsScreen
+import com.example.rentproject.presentation.settings.SettingsViewModel
 import com.example.rentproject.presentation.util.ScaleTransitionDirection
 import com.example.rentproject.presentation.util.Screen
 import com.example.rentproject.presentation.util.scaleIntoContainer
@@ -21,7 +22,10 @@ import com.example.rentproject.presentation.util.scaleOutOfContainer
 @Composable
 fun Navigation(
     navController: NavHostController,
-    roomsViewModel: RoomsViewModel = hiltViewModel()
+    roomsViewModel: RoomsViewModel = hiltViewModel(),
+    darkTheme: Boolean,
+    onThemeUpdated : () -> Unit,
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
 
     NavHost(navController = navController, startDestination = Screen.HomeScreen.route) {
@@ -67,7 +71,9 @@ fun Navigation(
                 scaleOutOfContainer()
             }) {
             SettingsScreen(
-                navController = navController
+                navController = navController,
+                darkTheme,
+                onThemeUpdated
             )
         }
 
