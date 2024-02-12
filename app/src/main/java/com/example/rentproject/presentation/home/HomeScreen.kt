@@ -427,6 +427,8 @@ fun RoomCard(
         shape = shape,
         onClick = {
             expandedState = !expandedState
+            //here function
+            saveNavigatedRoom.invoke(room)
         }
     ) {
         Column(

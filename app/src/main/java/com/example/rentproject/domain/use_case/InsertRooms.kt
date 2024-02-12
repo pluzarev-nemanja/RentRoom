@@ -33,7 +33,6 @@ class InsertRooms(
                 roomName = roomName,
                 reservationPeriod = 0,
                 totalIncome = 0F,
-                currency = "rsd",
                 floorId = floorId
             )
             roomNum++

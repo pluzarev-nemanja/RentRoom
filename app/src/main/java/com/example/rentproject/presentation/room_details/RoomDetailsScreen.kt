@@ -1,6 +1,7 @@
 package com.example.rentproject.presentation.room_details
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -100,13 +101,12 @@ fun RoomDetailsScreen(
     upsertPerson: (Person) -> Unit,
     upsertRoom: (Room) -> Unit,
     deletePerson: (Person) -> Unit,
-    currency: Boolean
+    currency: Boolean,
+    pers: Person?
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var person by remember {
-        if (roomAndPerson.isNotEmpty()) mutableStateOf(roomAndPerson.first().person) else mutableStateOf<Person?>(
-            null
-        )
+        mutableStateOf(pers)
     }
     var name by remember {
         mutableStateOf("")
@@ -126,20 +126,21 @@ fun RoomDetailsScreen(
         )
     }
     var personName by remember {
-        mutableStateOf(person?.personName)
+        if(person == null) mutableStateOf("") else mutableStateOf(person!!.personName)
     }
     var personSurname by remember {
-        mutableStateOf(person?.personsLastName)
+        if(person == null) mutableStateOf("") else mutableStateOf(person!!.personsLastName)
     }
     var personGender by remember {
-        mutableStateOf(person?.gender)
+        if(person == null) mutableStateOf(false) else mutableStateOf(person!!.gender)
     }
     var phone by remember {
-        mutableStateOf(person?.phoneNumber)
+        if(person == null) mutableIntStateOf(0) else mutableIntStateOf(person!!.phoneNumber)
     }
 
     val localContext = LocalContext.current
 
+    Log.d("PERSON", person.toString())
 
     Scaffold(
         modifier = Modifier
@@ -155,6 +156,7 @@ fun RoomDetailsScreen(
                         if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
                             navController.popBackStack()
                         }
+                        person = null
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.ArrowBack,
@@ -220,7 +222,7 @@ fun RoomDetailsScreen(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(8.dp)
                         )
-                        OutlinedTextField(value = personName!!, onValueChange = {
+                        OutlinedTextField(value = personName, onValueChange = {
                             personName = it
                         },
                             label = { Text("First name") },
@@ -249,7 +251,7 @@ fun RoomDetailsScreen(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(8.dp)
                         )
-                        OutlinedTextField(value = personSurname!!,
+                        OutlinedTextField(value = personSurname,
                             onValueChange = {
                                 personSurname = it
                             },
@@ -310,7 +312,7 @@ fun RoomDetailsScreen(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(8.dp)
                         )
-                        OutlinedTextField(value = if (personGender == true) "Male" else "Female",
+                        OutlinedTextField(value = if (personGender) "Male" else "Female",
                             onValueChange = {
                                 personGender = it.toBoolean()
                             },
@@ -335,10 +337,11 @@ fun RoomDetailsScreen(
                         Button(onClick = {
                             upsertPerson.invoke(
                                 person!!.copy(
-                                    personName = personName!!,
-                                    personsLastName = personSurname!!,
-                                    phoneNumber = phone!!,
-                                    gender = personGender!!
+                                    personName = personName,
+                                    personsLastName = personSurname,
+                                    phoneNumber = phone,
+                                    gender = personGender,
+                                    personId = 0
                                 )
                             )
                             Toast.makeText(localContext, "Persons data updated!", Toast.LENGTH_LONG)
@@ -392,6 +395,7 @@ fun RoomDetailsScreen(
                                         modifier = Modifier.padding(8.dp)
                                     )
                                     OutlinedTextField(value = name, onValueChange = {
+                                        if(it.isNotEmpty())
                                         name = it
                                     },
                                         label = { Text("First name") },
@@ -421,6 +425,7 @@ fun RoomDetailsScreen(
                                         modifier = Modifier.padding(8.dp)
                                     )
                                     OutlinedTextField(value = surname, onValueChange = {
+                                        if(it.isNotEmpty())
                                         surname = it
                                     },
                                         label = { Text("Last name") },
@@ -450,6 +455,7 @@ fun RoomDetailsScreen(
                                         modifier = Modifier.padding(8.dp)
                                     )
                                     OutlinedTextField(value = phoneNum.toString(), onValueChange = {
+                                        if(it.isNotEmpty())
                                         phoneNum = it.toInt()
                                     },
                                         label = { Text("Phone number") },
@@ -481,6 +487,7 @@ fun RoomDetailsScreen(
                                     )
                                     OutlinedTextField(value = if (gender) "Male" else "Female",
                                         onValueChange = {
+                                            if(it.isNotEmpty())
                                             gender = it.toBoolean()
                                         },
                                         label = { Text("Gender") },
@@ -512,6 +519,14 @@ fun RoomDetailsScreen(
                                         room.copy(
                                             available = false
                                         )
+                                    )
+                                    person = Person(
+                                        personId = 0,
+                                        personName = name,
+                                        personsLastName = surname,
+                                        phoneNumber = phoneNum,
+                                        gender = gender,
+                                        roomId = room.roomId
                                     )
                                 }
 

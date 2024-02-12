@@ -51,7 +51,6 @@ fun Navigation(
                 secondFloor = roomsViewModel.secondFloor,
                 saveNavigatedRoom = { room->
                     roomsViewModel.saveNavigatedRoom(room)
-                    roomsViewModel.getRoomAndPerson(room!!.roomId)
                 },
                 navController = navController,
                 currency = currency
@@ -109,7 +108,8 @@ fun Navigation(
                 deletePerson = {
                     roomsViewModel.deletePerson(it)
                 },
-                currency = currency
+                currency = currency,
+                pers = roomsViewModel.navigatedPerson.value
             )
         }
     }

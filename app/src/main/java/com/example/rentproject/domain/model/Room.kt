@@ -11,6 +11,5 @@ data class Room(
     val roomName : String,
     val reservationPeriod : Int,
     val totalIncome : Float,
-    val currency: String,
     val floorId : Int
 )
