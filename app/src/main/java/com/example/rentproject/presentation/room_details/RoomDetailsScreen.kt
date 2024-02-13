@@ -3,15 +3,20 @@ package com.example.rentproject.presentation.room_details
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MagnifierStyle
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,19 +27,25 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.magnifier
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Female
+import androidx.compose.material.icons.filled.Male
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Dangerous
-import androidx.compose.material.icons.outlined.Person4
 import androidx.compose.material.icons.outlined.PersonPinCircle
 import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material3.Button
@@ -56,6 +67,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -90,7 +102,6 @@ import com.example.rentproject.R
 import com.example.rentproject.data.data_source.relations.RoomAndPerson
 import com.example.rentproject.domain.model.Person
 import com.example.rentproject.domain.model.Room
-import java.util.Currency
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -126,16 +137,16 @@ fun RoomDetailsScreen(
         )
     }
     var personName by remember {
-        if(person == null) mutableStateOf("") else mutableStateOf(person!!.personName)
+        if (person == null) mutableStateOf("") else mutableStateOf(person!!.personName)
     }
     var personSurname by remember {
-        if(person == null) mutableStateOf("") else mutableStateOf(person!!.personsLastName)
+        if (person == null) mutableStateOf("") else mutableStateOf(person!!.personsLastName)
     }
     var personGender by remember {
-        if(person == null) mutableStateOf(false) else mutableStateOf(person!!.gender)
+        if (person == null) mutableStateOf(false) else mutableStateOf(person!!.gender)
     }
     var phone by remember {
-        if(person == null) mutableIntStateOf(0) else mutableIntStateOf(person!!.phoneNumber)
+        if (person == null) mutableIntStateOf(0) else mutableIntStateOf(person!!.phoneNumber)
     }
 
     val localContext = LocalContext.current
@@ -173,6 +184,9 @@ fun RoomDetailsScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
         ) {
+
+            var isError by rememberSaveable { mutableStateOf(false) }
+
 
             BedDetails(
                 paddingValues = paddingValues,
@@ -281,52 +295,53 @@ fun RoomDetailsScreen(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(8.dp)
                         )
-                        OutlinedTextField(value = phone.toString(), onValueChange = {
-                            if (it.isNotEmpty())
-                                phone = it.toInt()
-                        },
+                        OutlinedTextField(
+                            value = phone.toString(),
+                            onValueChange = {
+                                phone = if (it.isNotEmpty() && it.toIntOrNull() != null)
+                                    it.toInt()
+                                else
+                                    0
+                                isError = it.isEmpty() || it.toIntOrNull() == null
+                            },
                             label = { Text("Phone number") },
                             singleLine = true,
                             shape = RoundedCornerShape(15.dp),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                             trailingIcon = {
-                                Icon(
-                                    imageVector = Icons.Outlined.PhoneAndroid,
-                                    contentDescription = "person"
-                                )
-                            }
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Guest Gender : ",
-                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                        OutlinedTextField(value = if (personGender) "Male" else "Female",
-                            onValueChange = {
-                                personGender = it.toBoolean()
+                                if (isError)
+                                    Icon(
+                                        Icons.Filled.Error,
+                                        "error",
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                else
+                                    Icon(
+                                        imageVector = Icons.Outlined.PhoneAndroid,
+                                        contentDescription = "person"
+                                    )
                             },
-                            label = { Text("Gender") },
-                            singleLine = true,
-                            shape = RoundedCornerShape(15.dp),
-                            trailingIcon = {
-                                Icon(
-                                    imageVector = Icons.Outlined.Person4,
-                                    contentDescription = "person"
-                                )
-                            }
+                            isError = isError,
+                            supportingText = {
+                                if (isError) {
+                                    Text(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        text = "Incorrect input!",
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            },
                         )
                     }
+
+                    GenderPicker(
+                        gender = personGender, onClick = {
+                            personGender = !personGender
+                            gender = personGender
+                        },
+                        size = 40.dp
+                    )
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -335,17 +350,23 @@ fun RoomDetailsScreen(
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         Button(onClick = {
-                            upsertPerson.invoke(
-                                person!!.copy(
-                                    personName = personName,
-                                    personsLastName = personSurname,
-                                    phoneNumber = phone,
-                                    gender = personGender,
-                                    personId = 0
+                            if (!isError) {
+                                upsertPerson.invoke(
+                                    person!!.copy(
+                                        personName = personName,
+                                        personsLastName = personSurname,
+                                        phoneNumber = phone,
+                                        gender = personGender,
+                                        personId = 0
+                                    )
                                 )
-                            )
-                            Toast.makeText(localContext, "Persons data updated!", Toast.LENGTH_LONG)
-                                .show()
+                                Toast.makeText(
+                                    localContext,
+                                    "Persons data updated!",
+                                    Toast.LENGTH_LONG
+                                )
+                                    .show()
+                            }
                         }) {
                             Text(text = "Update Person")
                         }
@@ -395,8 +416,8 @@ fun RoomDetailsScreen(
                                         modifier = Modifier.padding(8.dp)
                                     )
                                     OutlinedTextField(value = name, onValueChange = {
-                                        if(it.isNotEmpty())
-                                        name = it
+                                        if (it.isNotEmpty())
+                                            name = it
                                     },
                                         label = { Text("First name") },
                                         singleLine = true,
@@ -425,8 +446,8 @@ fun RoomDetailsScreen(
                                         modifier = Modifier.padding(8.dp)
                                     )
                                     OutlinedTextField(value = surname, onValueChange = {
-                                        if(it.isNotEmpty())
-                                        surname = it
+                                        if (it.isNotEmpty())
+                                            surname = it
                                     },
                                         label = { Text("Last name") },
                                         singleLine = true,
@@ -455,8 +476,8 @@ fun RoomDetailsScreen(
                                         modifier = Modifier.padding(8.dp)
                                     )
                                     OutlinedTextField(value = phoneNum.toString(), onValueChange = {
-                                        if(it.isNotEmpty())
-                                        phoneNum = it.toInt()
+                                        if (it.isNotEmpty())
+                                            phoneNum = it.toInt()
                                     },
                                         label = { Text("Phone number") },
                                         singleLine = true,
@@ -470,37 +491,15 @@ fun RoomDetailsScreen(
                                         }
                                     )
                                 }
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = "Guest Gender : ",
-                                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                                        fontWeight = FontWeight.Medium,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.padding(8.dp)
-                                    )
-                                    OutlinedTextField(value = if (gender) "Male" else "Female",
-                                        onValueChange = {
-                                            if(it.isNotEmpty())
-                                            gender = it.toBoolean()
-                                        },
-                                        label = { Text("Gender") },
-                                        singleLine = true,
-                                        shape = RoundedCornerShape(15.dp),
-                                        trailingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Outlined.Person4,
-                                                contentDescription = "person"
-                                            )
-                                        }
-                                    )
-                                }
+
+                                GenderPicker(
+                                    gender = gender, onClick = {
+                                        gender = !gender
+                                        personGender = gender
+                                    },
+                                    size = 40.dp
+                                )
+
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             OutlinedButton(onClick = {
@@ -544,6 +543,96 @@ fun RoomDetailsScreen(
     }
 }
 
+@Composable
+fun GenderPicker(
+    gender: Boolean,
+    animationSpec: AnimationSpec<Dp> = tween(durationMillis = 300),
+    size: Dp = 150.dp,
+    padding: Dp = 10.dp,
+    borderWidth: Dp = 1.dp,
+    parentShape: RoundedCornerShape = CircleShape,
+    toggleShape: RoundedCornerShape = CircleShape,
+    onClick: () -> Unit,
+    iconSize: Dp = size / 3
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .border(
+                BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
+                RoundedCornerShape(20.dp)
+            )
+            .padding(15.dp)
+    ) {
+        Text(
+            text = "Guest Gender : ",
+            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(8.dp)
+        )
+        val offset by animateDpAsState(
+            targetValue = if (gender) 0.dp else size,
+            animationSpec = animationSpec, label = ""
+        )
+
+        Box(modifier = Modifier
+            .width(size * 2)
+            .height(size)
+            .clip(shape = parentShape)
+            .clickable { onClick() }
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(size)
+                    .offset(x = offset)
+                    .padding(all = padding)
+                    .clip(shape = toggleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            ) {}
+            Row(
+                modifier = Modifier
+                    .border(
+                        border = BorderStroke(
+                            width = borderWidth,
+                            color = MaterialTheme.colorScheme.primary
+                        ),
+                        shape = parentShape
+                    )
+            ) {
+                Box(
+                    modifier = Modifier.size(size),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        modifier = Modifier.size(iconSize),
+                        imageVector = Icons.Default.Male,
+                        contentDescription = "Theme Icon",
+                        tint = if (gender) MaterialTheme.colorScheme.secondaryContainer
+                        else MaterialTheme.colorScheme.primary
+                    )
+                }
+                Box(
+                    modifier = Modifier.size(size),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        modifier = Modifier.size(iconSize),
+                        imageVector = Icons.Default.Female,
+                        contentDescription = "Theme Icon",
+                        tint = if (gender) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.secondaryContainer
+                    )
+                }
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -576,7 +665,13 @@ fun BedDetails(
         )
     }
     val curr by remember {
-        if(!currency) mutableStateOf("Euro") else mutableStateOf("Rsd")
+        if (!currency) mutableStateOf("Euro") else mutableStateOf("Rsd")
+    }
+    var rentError by remember {
+        mutableStateOf(false)
+    }
+    var reservationError by remember {
+        mutableStateOf(false)
     }
     Column(
         modifier = Modifier
@@ -753,24 +848,49 @@ fun BedDetails(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(8.dp)
                     )
-                    OutlinedTextField(value = rent.toString(), onValueChange = {
-                        if (it.isNotEmpty())
-                            rent = it.toFloat()
-                    },
+                    OutlinedTextField(
+                        value = rent.toString(),
+                        onValueChange = {
+                            if (it.isNotEmpty() && it.toFloatOrNull() != null) {
+                                rent = it.toFloat()
+                                rentError = false
+                            } else {
+                                rent = 0f
+                                rentError = true
+                            }
+                        },
                         label = { Text("Change price") },
                         singleLine = true,
                         shape = RoundedCornerShape(15.dp),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                         trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Outlined.AttachMoney,
-                                contentDescription = "money"
-                            )
+                            if (rentError)
+                                Icon(
+                                    Icons.Filled.Error,
+                                    "error",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            else
+                                Icon(
+                                    imageVector = Icons.Outlined.AttachMoney,
+                                    contentDescription = "money"
+                                )
                         },
                         suffix = {
                             Text(text = curr)
-                        }
-                    )
+                        },
+                        isError = rentError,
+                        supportingText = {
+                            if (rentError) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Incorrect input!",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
+
+                        )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -789,25 +909,51 @@ fun BedDetails(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(8.dp)
                     )
-                    OutlinedTextField(value = reservationPeriod.toString(), onValueChange = { day ->
-                        if (day.isNotEmpty())
-                            reservationPeriod = day.toInt()
-                    },
+                    OutlinedTextField(
+                        value = reservationPeriod.toString(),
+                        onValueChange = { day ->
+                            if (day.isNotEmpty() && day.toIntOrNull() != null) {
+                                reservationPeriod = day.toInt()
+                                reservationError = false
+                            } else {
+                                reservationPeriod = 0
+                                reservationError = true
+                            }
+
+
+                        },
                         label = { Text("Change period") },
                         singleLine = true,
                         shape = RoundedCornerShape(15.dp),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                         trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Outlined.CalendarMonth,
-                                contentDescription = "money"
-                            )
+                            if (reservationError)
+                                Icon(
+                                    Icons.Filled.Error,
+                                    "error",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            else
+                                Icon(
+                                    imageVector = Icons.Outlined.CalendarMonth,
+                                    contentDescription = "money"
+                                )
                         },
                         suffix = {
                             Text(text = " days")
-                        }
+                        },
+                        isError = reservationError,
+                        supportingText = {
+                            if (reservationError) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Incorrect input!",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
 
-                    )
+                        )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
@@ -855,17 +1001,18 @@ fun BedDetails(
                     horizontalArrangement = Arrangement.End
                 ) {
                     Button(onClick = {
-                        //update function for bed data
-                        upsertRoom.invoke(
-                            room!!.copy(
-                                available = available == "Yes",
-                                rent = rent!!,
-                                reservationPeriod = reservationPeriod!!,
-                                totalIncome = totalIncome!!
+                        if (!rentError && !reservationError) {
+                            upsertRoom.invoke(
+                                room!!.copy(
+                                    available = available == "Yes",
+                                    rent = rent!!,
+                                    reservationPeriod = reservationPeriod!!,
+                                    totalIncome = totalIncome!!
+                                )
                             )
-                        )
-                        Toast.makeText(localContext, "Bed details updated!", Toast.LENGTH_LONG)
-                            .show()
+                            Toast.makeText(localContext, "Bed details updated!", Toast.LENGTH_LONG)
+                                .show()
+                        }
                     }) {
                         Text(text = "Update changes")
                     }
