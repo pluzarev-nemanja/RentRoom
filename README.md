@@ -16,19 +16,14 @@
 
 ## 📱 Screenshots
 ### App Themes
-| <img src="screenshots/homeBlack.jpg" width="200"/> | <img src="screenshots/homeWhite.jpg" width="200"/> | 
+| <img src="screenshots/1707910275624.jpg" width="200"/> | <img src="screenshots/1707910275641.jpg" width="200"/> | 
 |:---:|:---:|
 |Dark theme| White theme|
 
 ### Navigation screens
-| <img src="screenshots/homeBlack.jpg" width="200"/>| <img src="screenshots/songsBlack.jpg" width="200"/>| <img src="screenshots/albumsWhite.jpg" width="200"/>| <img src="screenshots/settingsWhite.jpg" width="200"/>| <img src="screenshots/searchBlack.jpg" width="200"/>| <img src="screenshots/detailsBlack.jpg" width="200"/>|
-|:---:|:---:|:---:|:---:|:---:|:---:|
-| Home | Songs | Albums | Settings | Search | Album details |
-
-### Player screens
-| <img src="screenshots/playerWhite.jpg" width="200"/>| <img src="screenshots/playerBlack.jpg" width="200"/>| <img src="screenshots/playerBlack2.jpg" width="200"/>|
-|:---:|:---:|:---:|
-| White theme | Dark theme | With snow effect |
+| <img src="screenshots/1707910275648.jpg" width="200"/>| <img src="screenshots/1707910275635.jpg" width="200"/>| <img src="screenshots/1707910275602.jpg" width="200"/>| <img src="screenshots/1707910275609.jpg" width="200"/>| <img src="screenshots/1707910275631.jpg" width="200"/>|
+|:---:|:---:|:---:|:---:|:---:|
+| Home | Settings | Bed Details | Bed Details(Dark) | Settings(Dark) |
 
 
 ## 🧭 Navigation never been made easier 
