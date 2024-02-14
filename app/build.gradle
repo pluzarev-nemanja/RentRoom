@@ -94,5 +94,11 @@ dependencies {
     //splash API
     implementation "androidx.core:core-splashscreen:1.0.1"
 
+    //truth for testing
+    testImplementation "com.google.truth:truth:1.4.0"
+    androidTestImplementation "com.google.truth:truth:1.4.0"
 
+    androidTestImplementation "androidx.arch.core:core-testing:2.1.0"
+    testImplementation 'app.cash.turbine:turbine:0.7.0'
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.1"
 }

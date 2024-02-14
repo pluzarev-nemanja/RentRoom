@@ -182,7 +182,7 @@ fun HomeScreen(
         background = {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(R.drawable.ic_launcher_background)
+                    .data(MaterialTheme.colorScheme.primary)
                     .crossfade(true)
                     .build(),
                 modifier = Modifier.fillMaxSize(),
@@ -190,7 +190,7 @@ fun HomeScreen(
                 contentDescription = null,
             )
         },
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         Scaffold(
             modifier = Modifier
@@ -406,8 +406,8 @@ fun RoomCard(
         mutableStateOf(if (available) "Yes" else "No")
     }
     val color by remember {
-        if (available) mutableStateOf(Color(0xFF74E291))
-        else mutableStateOf(Color(0xFFFF004D))
+        if (available) mutableStateOf(Color(0xFF00ffcc))
+        else mutableStateOf(Color(0xFFff0066))
     }
     val curr by remember {
         if(!currency) mutableStateOf("Euro") else mutableStateOf("Rsd")

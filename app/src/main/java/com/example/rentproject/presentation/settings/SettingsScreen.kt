@@ -160,7 +160,7 @@ fun SettingsScreen(
         background = {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(R.drawable.ic_launcher_background)
+                    .data(MaterialTheme.colorScheme.primary)
                     .crossfade(true)
                     .build(),
                 modifier = Modifier.fillMaxSize(),

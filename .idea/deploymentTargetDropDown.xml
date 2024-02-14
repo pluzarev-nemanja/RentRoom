@@ -18,6 +18,12 @@
           <timeTargetWasSelectedWithDropDown value="2024-02-08T11:57:41.546258500Z" />
         </State>
       </entry>
+      <entry key="deleteRoom()">
+        <State />
+      </entry>
+      <entry key="insertRooms()">
+        <State />
+      </entry>
     </value>
   </component>
 </project>

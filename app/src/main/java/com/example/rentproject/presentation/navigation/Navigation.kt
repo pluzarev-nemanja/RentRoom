@@ -98,7 +98,6 @@ fun Navigation(
             RoomDetailsScreen(
                 room = roomsViewModel.navigatedRoom.value,
                 navController = navController,
-                roomAndPerson = roomsViewModel.roomAndPerson,
                 upsertPerson = {
                     roomsViewModel.upsertPerson(it)
                 },
@@ -109,7 +108,8 @@ fun Navigation(
                     roomsViewModel.deletePerson(it)
                 },
                 currency = currency,
-                pers = roomsViewModel.navigatedPerson.value
+                pers = roomsViewModel.navigatedPerson.value,
+                darkTheme
             )
         }
     }

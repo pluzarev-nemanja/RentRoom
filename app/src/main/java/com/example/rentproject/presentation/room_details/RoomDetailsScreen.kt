@@ -99,21 +99,20 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.rentproject.R
-import com.example.rentproject.data.data_source.relations.RoomAndPerson
 import com.example.rentproject.domain.model.Person
 import com.example.rentproject.domain.model.Room
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoomDetailsScreen(
     room: Room?,
     navController: NavHostController,
-    roomAndPerson: List<RoomAndPerson>,
     upsertPerson: (Person) -> Unit,
     upsertRoom: (Room) -> Unit,
     deletePerson: (Person) -> Unit,
     currency: Boolean,
-    pers: Person?
+    pers: Person?,
+    darkTheme: Boolean
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var person by remember {
@@ -194,7 +193,8 @@ fun RoomDetailsScreen(
                 available = available,
                 upsertRoom = upsertRoom,
                 localContext = localContext,
-                currency = currency
+                currency = currency,
+                darkTheme
             )
 
             Column(
@@ -642,7 +642,8 @@ fun BedDetails(
     available: String,
     upsertRoom: (Room) -> Unit,
     localContext: Context,
-    currency: Boolean
+    currency: Boolean,
+    darkTheme: Boolean
 ) {
     var text by remember { mutableStateOf(room?.roomName) }
     val floorImage by remember {
@@ -688,7 +689,7 @@ fun BedDetails(
                 .drawAnimatedBorder(
                     strokeWidth = 4.dp,
                     durationMillis = 2000,
-                    shape = RoundedCornerShape(20.dp)
+                    shape = RoundedCornerShape(20.dp),
                 ),
             shape = RoundedCornerShape(20.dp),
         ) {
@@ -753,22 +754,12 @@ fun BedDetails(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.White.copy(alpha = 0.1F)),
-                        startY = 0.0f,
-                        endY = 400.0f
-                    )
-                )
         ) {
             Card(
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background.copy(alpha = 0.9f)),
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 8.dp
-                )
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
@@ -1036,6 +1027,8 @@ fun Modifier.drawAnimatedBorder(
             Color(0xffffff66),
             Color(0xffcc8f00)
         )
+
+
         Brush.sweepGradient(gradientColors)
     },
     durationMillis: Int
