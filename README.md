@@ -67,3 +67,4 @@ Where you can check all details about bed and person who stays there.
 -  Material 3 design
 -  Splash screen API
 -  Compose navigation
+-  R8 + Proguard
