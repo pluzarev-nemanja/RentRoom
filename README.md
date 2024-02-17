@@ -14,6 +14,11 @@
 
 </p>
 
+## 🌐 About app
+
+This app is useful for keeping track of occupied/vacant beds on all floors in the house.At the client's request, all necessary parameters for monitoring the rooms and persons staying in the house were implemented.
+
+
 ## 📱 Screenshots
 ### App Themes
 | <img src="screenshots/1707910275624.jpg" width="200"/> | <img src="screenshots/1707910275641.jpg" width="200"/> | 
